@@ -9,17 +9,6 @@ local dlg = Dialog
 local data = dlg.data
 dlg.data = data
 
--- Standard values when opening
--- if hasvalues ~= nil
--- then
-	-- hasvalues = true
-	-- local vmhueslider = 160
-	-- local vmsatslider = 40
-	-- local vmvalueslider = 35
-	-- local vmalphaslider = 255
--- end
-
-
 -- TEST DELETE LATER
   local C = app.fgColor
   if(shadingColor ~= nil) then
@@ -288,58 +277,6 @@ dlg
 		"18"
 	}
 }
--- COLOR CONTROL
--- :separator
--- {
-	-- id = "separator",
--- }
--- :slider
--- {
-	-- id = "hueslider",
-	-- label = "Hue: ",
-	-- min = 0,
-	-- max = 360,
-	-- value = vmhueslider,
-	-- onchange = function()
-	-- end,
-	-- onrelease = function()
-	-- end
--- }
--- :slider
--- {
-	-- id = "satslider",
-	-- label = "Sat/Val: ",
-	-- min = 0,
-	-- max = 100,
-	-- value = vmsatslider,
-	-- onchange = function()
-	-- end,
-	-- onrelease = function()
-	-- end
--- }
--- :slider
--- {
-	-- id = "valueslider",
-	-- min = 0,
-	-- max = 100,
-	-- value = vmvalueslider,
-	-- onchange = function()
-	-- end,
-	-- onrelease = function()
-	-- end
--- }
--- :slider
--- {
-	-- id = "alphaeslider",
-	-- label = "Alpha: ",
-	-- min = 0,
-	-- max = 255,
-	-- value = vmalphaslider,
-	-- onchange = function()
-	-- end,
-	-- onrelease = function()
-	-- end
--- }
 :label
 {
 	id=huelabel,
