@@ -588,7 +588,8 @@ end
 		id = "buttonReload",
 		text = "Reload",
 		onclick = function()
-		savedBounds = dlg.bounds
+			reloadColors(app.fgColor, dlg.bounds)
+			dlg:close()
 		end
 	}
 	:button
@@ -596,7 +597,6 @@ end
 		id = "buttonCancel",
 		text = "Cancel",
 		onclick = function()
-			print(savedBounds)
 		end
 	}
 	:show
