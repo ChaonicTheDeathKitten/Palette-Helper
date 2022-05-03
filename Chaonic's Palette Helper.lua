@@ -7,12 +7,9 @@ local dlg = Dialog
 		title = "Chaonic's Palette Helper"
 	}
 local data = dlg.data
+local C = app.fgColor
 
--- TEST DELETE LATER
-  local C = app.fgColor
-  if(shadingColor ~= nil) then
-    C = shadingColor
-  end
+-- COLOR CALCULATIONS
 
 local function colorCalc()
 	end
@@ -31,21 +28,7 @@ local ColorRight
 local ColorClipboard
 	ColorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
 
--- COLOR AMOUNT CHANGED
-
-local function amountOfColorsChanged()
-	if dlg.data.amountOfColors == "7"
-		then print("Changed Amount of Colors to 7")
-	elseif dlg.data.amountOfColors == "9"
-		then print("Changed Amount of Colors to 9")
-	elseif dlg.data.amountOfColors == "11"
-		then print("Changed Amount of Colors to 11")
-	elseif dlg.data.amountOfColors == "13"
-		then print("Changed Amount of Colors to 13")
-	elseif dlg.data.amountOfColors == "15"
-		then print("Changed Amount of Colors to 15")
-	end
-end
+local amountOfColorsVar = "15"
 
 -- RELOAD COLORS
 
@@ -56,8 +39,29 @@ function reloadColors(windowBounds)
 		title = "Chaonic's Palette Helper"
 	}
 
+-- COLOR AMOUNT CHANGED
 
--- COLOR VARIABLE STORAGE
+local function amountOfColorsChanged()
+	if dlg.data.amountOfColors == "7" then
+		amountOfColorsVar = "7"
+		-- print "Changed Amount of Colors to 7"
+	elseif (dlg.data.amountOfColors == "9") then
+		amountOfColorsVar = "9"
+		-- print "Changed Amount of Colors to 9"
+	elseif dlg.data.amountOfColors == "11" then
+		amountOfColorsVar = "11"
+		-- print "Changed Amount of Colors to 11"
+	elseif dlg.data.amountOfColors == "13" then
+		amountOfColorsVar = "13"
+		-- print "Changed Amount of Colors to 13"
+	elseif dlg.data.amountOfColors == "15" then
+		amountOfColorsVar = "15"
+		-- print "Changed Amount of Colors to 15"
+	else
+		print "Couldn't determine Amount of Colors"
+		print("The current Amount of Colors selected is ", dlg.data.amountOfColors)
+	end
+end
 
 -- SHADE
 	local Sha1 = colorCalc("sha",	7,	1,	100/8*7,	1,	100/7*6,	1,	100/6*5,	1,	100/5*4,	1,	100/4*3	)
@@ -281,7 +285,7 @@ function reloadColors(windowBounds)
 	:combobox
 	{
 		id = "amountOfColors",
-		option = "15",
+		option = amountOfColorsVar,
 		options =
 		{
 			"7",
@@ -291,8 +295,8 @@ function reloadColors(windowBounds)
 			"15"
 		},
 		onchange = function()
-			print("Changed Amount of Colors to 15")
 			amountOfColorsChanged()
+			-- print ("Amount of Colors has changed!")
 		end
 	}
 	:combobox
@@ -353,6 +357,7 @@ function reloadColors(windowBounds)
 		option = "Quad",
 		options =
 		{
+			"RGB",
 			"Sine",
 			"Quad",
 			"Cubic",
@@ -370,6 +375,7 @@ function reloadColors(windowBounds)
 		option = "Quad",
 		options =
 		{
+			"RGB",
 			"Sine",
 			"Quad",
 			"Cubic",
@@ -387,6 +393,7 @@ function reloadColors(windowBounds)
 		option = "Quad",
 		options =
 		{
+			"RGB",
 			"Sine",
 			"Quad",
 			"Cubic",
@@ -581,6 +588,7 @@ function reloadColors(windowBounds)
 		id = "buttonReload",
 		text = "Reload",
 		onclick = function()
+		savedBounds = dlg.bounds
 		end
 	}
 	:button
@@ -588,16 +596,17 @@ function reloadColors(windowBounds)
 		id = "buttonCancel",
 		text = "Cancel",
 		onclick = function()
+			print(savedBounds)
 		end
 	}
 	:show
 	{
 	wait = false, bounds = windowBounds
-	}
-	
+	}	
+
 end
 
 -- WHAT??? THIS KEEPS THE WIDGET UP?!
 do
-	reloadColors(app.fgColor)
+	reloadColors()
 end
