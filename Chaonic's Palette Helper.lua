@@ -28,7 +28,7 @@ local AI = alphaInterpolationVar
 
 -- COLOR CALCULATIONS
 
-local function hueEasing(easing4, easing6, easing8, easing12, easing18)
+local function hueEasing(position, easing4, easing6, easing8, easing12, easing18)
 local easingValue
 	if AOH == "4" then
 		maxPosition = 3
@@ -68,7 +68,10 @@ local easingValue
 		-- print ("Using outCirc easing calculation")
 	-- else
 		-- print ("ERROR: Hue Interpolation method unknown. It is currently ", HI,"... That's not on the list. Have you messed with the hueEasing function or the hueInterpolation combobox?")
-	-- easingValue = CM.hsvHue + easingValue
+	easingValue = CM.hsvHue + easingValue
+	if easingValue >= 360 then
+		easingValue = easingValue - 360
+	end
 return easingValue
 end
 
@@ -106,7 +109,7 @@ local function hueCalc(method, position, minAOH, baseOrCalc18, easing18, baseOrC
 	elseif method == "hhu" then
 		if AOH == "4" then
 			if position <= 3 then
-				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
+				newHue = hueEasing(position, easing4, easing6, easing8, easing12, easing18)
 				if newHue > 360 then
 					newHue = newHue - 360
 				end
@@ -116,40 +119,28 @@ local function hueCalc(method, position, minAOH, baseOrCalc18, easing18, baseOrC
 			outputColor.hsvHue = newHue
 		elseif AOH == "6" then
 			if position <= 5 then
-				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
-				if newHue > 360 then
-					newHue = newHue - 360
-				end
+				newHue = hueEasing(position, easing4, easing6, easing8, easing12, easing18)
 			else
 				outputColor = Color()
 			end
 			outputColor.hsvHue = newHue
 		elseif AOH == "8" then
 			if position <= 7 then
-				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
-				if newHue > 360 then
-					newHue = newHue - 360
-				end
+				newHue = hueEasing(position, easing4, easing6, easing8, easing12, easing18)
 			else
 				outputColor = Color()
 			end
 			outputColor.hsvHue = newHue
 		elseif AOH == "12" then
 			if position <= 11 then
-				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
-				if newHue > 360 then
-					newHue = newHue - 360
-				end
+				newHue = hueEasing(position, easing4, easing6, easing8, easing12, easing18)
 			else
 				outputColor = Color()
 			end
 			outputColor.hsvHue = newHue
 		elseif AOH == "18" then
 			if position <= 16 then
-				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
-				if newHue > 360 then
-					newHue = newHue - 360
-				end
+				newHue = hueEasing(position, easing4, easing6, easing8, easing12, easing18)
 			else
 				outputColor = Color()
 			end
