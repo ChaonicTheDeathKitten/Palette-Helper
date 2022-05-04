@@ -7,7 +7,6 @@ local dlg = Dialog
 		title = "Chaonic's Palette Helper"
 	}
 local data = dlg.data
-local C = app.fgColor
 
 -- COLOR CALCULATIONS
 
@@ -19,16 +18,29 @@ local function hueCalc()
 
 -- STANDARD VALUES
 
-local ColorLeft
-	ColorLeft = Color{ r = 20, g = 20, b = 51, a = 255 }
-local ColorMain
-	ColorMain = app.fgColor
-local ColorRight
-	ColorRight = Color{ r = 230, g = 230, b = 195, a = 255 }
-local ColorClipboard
-	ColorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
-
+local ColorLeft = Color{ r = 20, g = 20, b = 51, a = 255 }
+local ColorMain = app.fgColor
+local ColorRight = Color{ r = 230, g = 230, b = 195, a = 255 }
+local ColorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
 local amountOfColorsVar = "15"
+local amountOfHuesVar = "12"
+local hueInterpolationVar = "RGB"
+local satInterpolationVar = "Quad"
+local valInterpolationVar = "Quad"
+local alphaInterpolationVar = "Quad"
+
+-- CHANGED VALUES
+
+local CL = ColorLeft
+local CM = ColorMain
+local CR = ColorRight
+local CC = ColorClipboard
+local AOC = amountOfColorsVar
+local AOH = amountOfHuesVar
+local HI = hueInterpolationVar
+local SI = satInterpolationVar
+local VI = valInterpolationVar
+local AI = alphaInterpolationVar
 
 -- RELOAD COLORS
 
@@ -38,30 +50,6 @@ function reloadColors(windowBounds)
 	{ 
 		title = "Chaonic's Palette Helper"
 	}
-
--- COLOR AMOUNT CHANGED
-
-local function amountOfColorsChanged()
-	if dlg.data.amountOfColors == "7" then
-		amountOfColorsVar = "7"
-		-- print "Changed Amount of Colors to 7"
-	elseif (dlg.data.amountOfColors == "9") then
-		amountOfColorsVar = "9"
-		-- print "Changed Amount of Colors to 9"
-	elseif dlg.data.amountOfColors == "11" then
-		amountOfColorsVar = "11"
-		-- print "Changed Amount of Colors to 11"
-	elseif dlg.data.amountOfColors == "13" then
-		amountOfColorsVar = "13"
-		-- print "Changed Amount of Colors to 13"
-	elseif dlg.data.amountOfColors == "15" then
-		amountOfColorsVar = "15"
-		-- print "Changed Amount of Colors to 15"
-	else
-		print "Couldn't determine Amount of Colors"
-		print("The current Amount of Colors selected is ", dlg.data.amountOfColors)
-	end
-end
 
 -- SHADE
 	local Sha1 = colorCalc("sha",	7,	1,	100/8*7,	1,	100/7*6,	1,	100/6*5,	1,	100/5*4,	1,	100/4*3	)
@@ -230,7 +218,7 @@ end
 	:shades
 	{
 		id = "mainColors",
-		colors = {ColorLeft, ColorMain, ColorRight, ColorClipboard},
+		colors = {CL, CM, CR, CC},
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -242,9 +230,9 @@ end
 		id = "buttonSetLeft",
 		text = "Set",
 		onclick = function()
-			ColorLeft = app.fgColor
-			reloadColors(app.fgColor, dlg.bounds)
-			dlg:close()
+				CL = app.fgColor
+				reloadColors(dlg.bounds)
+				dlg:close()
 		end
 	}
 	:button
@@ -252,23 +240,29 @@ end
 		id = "buttonSetMain",
 		text = "Set",
 		onclick = function()
-			ColorMain = app.fgColor
+				CM = app.fgColor
+				reloadColors(dlg.bounds)
+				dlg:close()
 		end
 	}
 	:button
 	{
 		id = "buttonSetRight",
 		text = "Set",
-		onclick = function()
-			ColorRight = app.fgColor
+		onclick = function(ev)
+				CR = app.fgColor
+				reloadColors(dlg.bounds)
+				dlg:close()
 		end
 	}
 	:button
 	{
 		id = "buttonSetClipboard",
 		text = "Set",
-		onclick = function()
-			ColorClipboard = app.fgColor
+		onclick = function(ev)
+				CC = app.fgColor
+				reloadColors(dlg.bounds)
+				dlg:close()
 		end
 	}
 	:label
@@ -285,7 +279,7 @@ end
 	:combobox
 	{
 		id = "amountOfColors",
-		option = amountOfColorsVar,
+		option = AOC,
 		options =
 		{
 			"7",
@@ -295,14 +289,13 @@ end
 			"15"
 		},
 		onchange = function()
-			amountOfColorsChanged()
-			-- print ("Amount of Colors has changed!")
+			AOC = dlg.data.amountOfColors
 		end
 	}
 	:combobox
 	{
 		id = "amountOfHues",
-		option = "12",
+		option = AOH,
 		options =
 		{
 			"4",
@@ -310,7 +303,10 @@ end
 			"8",
 			"12",
 			"18"
-		}
+		},
+		onchange = function()
+			AOH = dlg.data.amountOfHues
+		end
 	}
 	:label
 	{
@@ -335,8 +331,8 @@ end
 	}
 	:combobox
 	{
-		id = "hueinterpolation",
-		option = "RGB",
+		id = "hueInterpolation",
+		option = HI,
 		options =
 		{
 			"RGB",
@@ -349,12 +345,15 @@ end
 			"outQuad",
 			"outCubic",
 			"outCirc"
-		}
+		},
+		onchange = function()
+			HI = dlg.data.hueInterpolation
+		end
 	}
 	:combobox
 	{
-		id = "satinterpolation",
-		option = "Quad",
+		id = "satInterpolation",
+		option = SI,
 		options =
 		{
 			"RGB",
@@ -367,12 +366,15 @@ end
 			"outQuad",
 			"outCubic",
 			"outCirc"
-		}
+		},
+		onchange = function()
+			SI = dlg.data.satInterpolation
+		end
 	}
 	:combobox
 	{
-		id = "valinterpolation",
-		option = "Quad",
+		id = "valInterpolation",
+		option = VI,
 		options =
 		{
 			"RGB",
@@ -385,12 +387,15 @@ end
 			"outQuad",
 			"outCubic",
 			"outCirc"
-		}
+		},
+		onchange = function()
+			VI = dlg.data.valInterpolation
+		end
 	}
 	:combobox
 	{
-		id = "alphainterpolation",
-		option = "Quad",
+		id = "alphaInterpolation",
+		option = AI,
 		options =
 		{
 			"RGB",
@@ -403,7 +408,10 @@ end
 			"outQuad",
 			"outCubic",
 			"outCirc"
-		}
+		},
+		onchange = function()
+			AI = dlg.data.alphaInterpolation
+		end
 	}
 -- COLOR CONTROL END
 	:separator
@@ -415,7 +423,12 @@ end
 	{
 		id = "paletteShade",
 		label = "Shade",
-		colors = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C}
+		colors = {CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
 	}
 	:button
 	{
@@ -437,7 +450,12 @@ end
 	{
 		id = "paletteSoftShade",
 		label = "Soft Shade",
-		colors = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C}
+		colors = {CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
 	}
 	:button
 	{
@@ -459,7 +477,12 @@ end
 	{
 		id = "paletteLight",
 		label = "Light",
-		colors = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C}
+		colors = {CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
 	}
 	:button
 	{
@@ -481,7 +504,12 @@ end
 	{
 		id = "paletteSoftLight",
 		label = "Soft Light",
-		colors = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C}
+		colors = {CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
 	}
 	:button
 	{
@@ -503,7 +531,12 @@ end
 	{
 		id = "paletteSaturation",
 		label = "Saturation",
-		colors = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C}
+		colors = {CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
 	}
 	:button
 	{
@@ -525,7 +558,12 @@ end
 	{
 		id = "paletteSoftSaturation",
 		label = "Soft Sat.",
-		colors = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C}
+		colors = {CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
 	}
 	:button
 	{
@@ -547,7 +585,12 @@ end
 	{
 		id = "paletteSoftHue",
 		label = "Soft Hue",
-		colors = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C}
+		colors = {CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
 	}
 	:button
 	{
@@ -562,7 +605,12 @@ end
 	{
 		id = "paletteHardHue",
 		label = "Hard Hue",
-		colors = {C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C, C}
+		colors = {CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR, CL, CM, CR},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
 	}
 	:button
 	{
@@ -578,9 +626,21 @@ end
 	}
 	:button
 	{
-		id = "buttonGenerate",
-		text = "Generate",
+		id = "buttonReset",
+		text = "Reset",
 		onclick = function()
+			CL = ColorLeft
+			CM = app.fgColor
+			CR = ColorRight
+			CC = ColorClipboard
+			AOC = amountOfColorsVar
+			AOH = amountOfHuesVar
+			HI = hueInterpolationVar
+			SI = satInterpolationVar
+			VI = valInterpolationVar
+			AI = alphaInterpolationVar
+			reloadColors(dlg.bounds)
+			dlg:close()
 		end
 	}
 	:button
@@ -588,7 +648,7 @@ end
 		id = "buttonReload",
 		text = "Reload",
 		onclick = function()
-			reloadColors(app.fgColor, dlg.bounds)
+			reloadColors(dlg.bounds)
 			dlg:close()
 		end
 	}
