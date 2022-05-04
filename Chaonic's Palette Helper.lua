@@ -8,7 +8,7 @@ local ColorRight = Color{ r = 230, g = 230, b = 195, a = 255 }
 local ColorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
 local amountOfColorsVar = "15"
 local amountOfHuesVar = "12"
-local hueInterpolationVar = "RGB"
+local hueInterpolationVar = "Standard"
 local satInterpolationVar = "Quad"
 local valInterpolationVar = "Quad"
 local alphaInterpolationVar = "Quad"
@@ -28,30 +28,69 @@ local AI = alphaInterpolationVar
 
 -- COLOR CALCULATIONS
 
+local function hueEasing(easing4, easing6, easing8, easing12, easing18)
+local easingValue
+	if AOH == "4" then
+		maxPosition = 3
+		easingValue = easing4
+	elseif AOH == "6" then
+		maxPosition = 5
+		easingValue = easing6
+	elseif AOH == "8" then
+		maxPosition = 7
+		easingValue = easing8
+	elseif AOH == "12" then
+		maxPosition = 11
+		easingValue = easing12
+	elseif AOH == "18" then
+		maxPosition = 11
+		easingValue = easing18
+	else
+		print ("ERROR: AOH value off charts")
+	end
+	-- if HI == "Standard" then
+		-- hello = yes
+	-- elseif HI == "Sine" then
+		-- print ("Using Sine easing calculation")
+	-- elseif HI == "Quad" then
+		-- print ("Using Quad easing calculation")
+	-- elseif HI == "Cubic" then
+		-- print ("Using Cubic easing calculation")
+	-- elseif HI == "Circ" then
+		-- print ("Using Circ easing calculation")
+	-- elseif HI == "outSine" then
+		-- print ("Using outSine easing calculation")
+	-- elseif HI == "outQuad" then
+		-- print ("Using outQuad easing calculation")
+	-- elseif HI == "outCubic" then
+		-- print ("Using outCubic easing calculation")
+	-- elseif HI == "outCirc" then
+		-- print ("Using outCirc easing calculation")
+	-- else
+		-- print ("ERROR: Hue Interpolation method unknown. It is currently ", HI,"... That's not on the list. Have you messed with the hueEasing function or the hueInterpolation combobox?")
+	-- easingValue = CM.hsvHue + easingValue
+return easingValue
+end
+
+
 local function colorCalc(method, position, minAOC, leftOrRight15, easing15, leftOrRight13, easing13, leftOrRight11, easing11, leftOrRight9, easing9, leftOrRight7, easing7)
 	outputColor = Color()
 	if method == "sha" then
-		print "Shading calculation not implemented"
 		-- Just use CM for now!
 		outputColor = CM
 	elseif method == "ssh" then
-		print "Soft Shading calculation not implemented"
 		-- Just use CM for now!
 		outputColor = CM
 	elseif method == "lig" then
-		print "Light calculation not implemented"
 		-- Just use CM for now!
 		outputColor = CM
 	elseif method == "slg" then
-		print "Soft Light calculation not implemented"
 		-- Just use CM for now!
 		outputColor = CM
 	elseif method == "sat" then
-		print "Saturation calculation not implemented"
 		-- Just use CM for now!
 		outputColor = CM
 	elseif method == "sst" then
-		print "Soft Saturation calculation not implemented"
 		-- Just use CM for now!
 		outputColor = CM
 	else
@@ -61,15 +100,61 @@ local function colorCalc(method, position, minAOC, leftOrRight15, easing15, left
 end
 
 local function hueCalc(method, position, minAOH, baseOrCalc18, easing18, baseOrCalc12, easing12, baseOrCalc8, easing8, baseOrCalc6, easing6, baseOrCalc4, easing4)
-	outputColor = Color()
+	local outputColor = Color(CM)
 	if method == "shu" then
-		print "Soft Hue calculation not implemented"
-		-- Just use CM for now!
 		outputColor = CM
 	elseif method == "hhu" then
-		print "Hard Hue calculation not implemented"
-		-- Just use CM for now!
-		outputColor = CM
+		if AOH == "4" then
+			if position <= 3 then
+				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
+				if newHue > 360 then
+					newHue = newHue - 360
+				end
+			else
+				outputColor = Color()
+			end
+			outputColor.hsvHue = newHue
+		elseif AOH == "6" then
+			if position <= 5 then
+				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
+				if newHue > 360 then
+					newHue = newHue - 360
+				end
+			else
+				outputColor = Color()
+			end
+			outputColor.hsvHue = newHue
+		elseif AOH == "8" then
+			if position <= 7 then
+				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
+				if newHue > 360 then
+					newHue = newHue - 360
+				end
+			else
+				outputColor = Color()
+			end
+			outputColor.hsvHue = newHue
+		elseif AOH == "12" then
+			if position <= 11 then
+				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
+				if newHue > 360 then
+					newHue = newHue - 360
+				end
+			else
+				outputColor = Color()
+			end
+			outputColor.hsvHue = newHue
+		elseif AOH == "18" then
+			if position <= 16 then
+				newHue = CM.hsvHue + hueEasing(easing4, easing6, easing8, easing12, easing18)
+				if newHue > 360 then
+					newHue = newHue - 360
+				end
+			else
+				outputColor = Color()
+			end
+			outputColor.hsvHue = newHue
+		end
 	end
 	return outputColor
 end
@@ -188,42 +273,42 @@ local function reloadColors(windowBounds)
 	local Sst15 = colorCalc("sst",	15,	15,	3,	100/8*7,	0,	0,			0,	0,			0,	0,			0,	0		)
 
 -- SOFT HUE
-	local Shu1 = hueCalc("shu",		1,	4,	1,	0,			1,	0,			1,	0,			1,	0,			1,	0		)
-	local Shu2 = hueCalc("shu",		2,	4,	2,	100/18	,	2,	100/12,		2,	100/8,		2,	100/6,		2,	100/4	)
-	local Shu3 = hueCalc("shu",		3,	4,	2,	100/18*2,	2,	100/12*2,	2,	100/8*2,	2,	100/6*2,	2,	100/4*2	)
-	local Shu4 = hueCalc("shu",		4,	4,	2,	100/18*3,	2,	100/12*3,	2,	100/8*3,	2,	100/6*3,	2,	100/4*3	)
-	local Shu5 = hueCalc("shu",		5,	6,	2,	100/18*4,	2,	100/12*4,	2,	100/8*4,	2,	100/6*4,	0,	0		)
-	local Shu6 = hueCalc("shu",		6,	6,	2,	100/18*5,	2,	100/12*5, 	2,	100/8*5,	2,	100/6*5,	0,	0		)
-	local Shu7 = hueCalc("shu",		7,	8,	2,	100/18*6,	2,	100/12*6,	2,	100/8*6,	0,	0,			0,	0		)
-	local Shu8 = hueCalc("shu",		8,	8,	2,	100/18*7,	2,	100/12*7,	2,	100/8*7,	0,	0,			0,	0		)
-	local Shu9 = hueCalc("shu",		9,	12,	2,	100/18*8,	2,	100/12*8,	0,	0,			0,	0,			0,	0		)
-	local Shu10 = hueCalc("shu",	10,	12,	2,	100/18*9,	2,	100/12*9,	0,	0,			0,	0,			0,	0		)
-	local Shu11 = hueCalc("shu",	11,	12,	2,	100/18*10,	2,	100/12*10,	0,	0,			0,	0,			0,	0		)
-	local Shu12 = hueCalc("shu",	12,	12,	2,	100/18*11,	2,	100/12*11,	0,	0,			0,	0,			0,	0		)
-	local Shu13 = hueCalc("shu",	13,	18,	2,	100/18*12,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Shu14 = hueCalc("shu",	14,	18,	2,	100/18*13,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Shu15 = hueCalc("shu",	15,	18,	2,	100/18*15,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Shu16 = hueCalc("shu",	16,	18,	2,	100/18*16,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Shu17 = hueCalc("shu",	17,	18,	2,	100/18*17,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Shu1 = hueCalc("shu",		0,	4,	1,	0,			1,	0,			1,	0,			1,	0,			1,	0		)
+	local Shu2 = hueCalc("shu",		1,	4,	2,	100/18	,	2,	100/12,		2,	100/8,		2,	100/6,		2,	100/4	)
+	local Shu3 = hueCalc("shu",		2,	4,	2,	100/18*2,	2,	100/12*2,	2,	100/8*2,	2,	100/6*2,	2,	100/4*2	)
+	local Shu4 = hueCalc("shu",		3,	4,	2,	100/18*3,	2,	100/12*3,	2,	100/8*3,	2,	100/6*3,	2,	100/4*3	)
+	local Shu5 = hueCalc("shu",		4,	6,	2,	100/18*4,	2,	100/12*4,	2,	100/8*4,	2,	100/6*4,	0,	0		)
+	local Shu6 = hueCalc("shu",		5,	6,	2,	100/18*5,	2,	100/12*5, 	2,	100/8*5,	2,	100/6*5,	0,	0		)
+	local Shu7 = hueCalc("shu",		6,	8,	2,	100/18*6,	2,	100/12*6,	2,	100/8*6,	0,	0,			0,	0		)
+	local Shu8 = hueCalc("shu",		7,	8,	2,	100/18*7,	2,	100/12*7,	2,	100/8*7,	0,	0,			0,	0		)
+	local Shu9 = hueCalc("shu",		8,	12,	2,	100/18*8,	2,	100/12*8,	0,	0,			0,	0,			0,	0		)
+	local Shu10 = hueCalc("shu",	9,	12,	2,	100/18*9,	2,	100/12*9,	0,	0,			0,	0,			0,	0		)
+	local Shu11 = hueCalc("shu",	10,	12,	2,	100/18*10,	2,	100/12*10,	0,	0,			0,	0,			0,	0		)
+	local Shu12 = hueCalc("shu",	11,	12,	2,	100/18*11,	2,	100/12*11,	0,	0,			0,	0,			0,	0		)
+	local Shu13 = hueCalc("shu",	12,	18,	2,	100/18*12,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Shu14 = hueCalc("shu",	13,	18,	2,	100/18*13,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Shu15 = hueCalc("shu",	14,	18,	2,	100/18*15,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Shu16 = hueCalc("shu",	15,	18,	2,	100/18*16,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Shu17 = hueCalc("shu",	16,	18,	2,	100/18*17,	0,	0,			0,	0,			0,	0,			0,	0		)
 
 -- HARD HUE
-	local Hhu1 = hueCalc("hhu",		1,	4,	1,	0,			1,	0,			1,	0,			1,	0,			1,	0		)
-	local Hhu2 = hueCalc("hhu",		2,	4,	2,	100/18	,	2,	100/12,		2,	100/8,		2,	100/6,		2,	100/4	)
-	local Hhu3 = hueCalc("hhu",		3,	4,	2,	100/18*2,	2,	100/12*2,	2,	100/8*2,	2,	100/6*2,	2,	100/4*2	)
-	local Hhu4 = hueCalc("hhu",		4,	4,	2,	100/18*3,	2,	100/12*3,	2,	100/8*3,	2,	100/6*3,	2,	100/4*3	)
-	local Hhu5 = hueCalc("hhu",		5,	6,	2,	100/18*4,	2,	100/12*4,	2,	100/8*4,	2,	100/6*4,	0,	0		)
-	local Hhu6 = hueCalc("hhu",		6,	6,	2,	100/18*5,	2,	100/12*5, 	2,	100/8*5,	2,	100/6*5,	0,	0		)
-	local Hhu7 = hueCalc("hhu",		7,	8,	2,	100/18*6,	2,	100/12*6,	2,	100/8*6,	0,	0,			0,	0		)
-	local Hhu8 = hueCalc("hhu",		8,	8,	2,	100/18*7,	2,	100/12*7,	2,	100/8*7,	0,	0,			0,	0		)
-	local Hhu9 = hueCalc("hhu",		9,	12,	2,	100/18*8,	2,	100/12*8,	0,	0,			0,	0,			0,	0		)
-	local Hhu10 = hueCalc("hhu",	10,	12,	2,	100/18*9,	2,	100/12*9,	0,	0,			0,	0,			0,	0		)
-	local Hhu11 = hueCalc("hhu",	11,	12,	2,	100/18*10,	2,	100/12*10,	0,	0,			0,	0,			0,	0		)
-	local Hhu12 = hueCalc("hhu",	12,	12,	2,	100/18*11,	2,	100/12*11,	0,	0,			0,	0,			0,	0		)
-	local Hhu13 = hueCalc("hhu",	13,	18,	2,	100/18*12,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Hhu14 = hueCalc("hhu",	14,	18,	2,	100/18*13,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Hhu15 = hueCalc("hhu",	15,	18,	2,	100/18*15,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Hhu16 = hueCalc("hhu",	16,	18,	2,	100/18*16,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Hhu17 = hueCalc("hhu",	17,	18,	2,	100/18*17,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Hhu1 = hueCalc("hhu",		0,	4,	1,	0,			1,	0,			1,	0,			1,	0,			1,	0		)
+	local Hhu2 = hueCalc("hhu",		1,	4,	2,	360/18	,	2,	360/12,		2,	360/8,		2,	360/6,		2,	360/4	)
+	local Hhu3 = hueCalc("hhu",		2,	4,	2,	360/18*2,	2,	360/12*2,	2,	360/8*2,	2,	360/6*2,	2,	360/4*2	)
+	local Hhu4 = hueCalc("hhu",		3,	4,	2,	360/18*3,	2,	360/12*3,	2,	360/8*3,	2,	360/6*3,	2,	360/4*3	)
+	local Hhu5 = hueCalc("hhu",		4,	6,	2,	360/18*4,	2,	360/12*4,	2,	360/8*4,	2,	360/6*4,	0,	0		)
+	local Hhu6 = hueCalc("hhu",		5,	6,	2,	360/18*5,	2,	360/12*5, 	2,	360/8*5,	2,	360/6*5,	0,	0		)
+	local Hhu7 = hueCalc("hhu",		6,	8,	2,	360/18*6,	2,	360/12*6,	2,	360/8*6,	0,	0,			0,	0		)
+	local Hhu8 = hueCalc("hhu",		7,	8,	2,	360/18*7,	2,	360/12*7,	2,	360/8*7,	0,	0,			0,	0		)
+	local Hhu9 = hueCalc("hhu",		8,	12,	2,	360/18*8,	2,	360/12*8,	0,	0,			0,	0,			0,	0		)
+	local Hhu10 = hueCalc("hhu",	9,	12,	2,	360/18*9,	2,	360/12*9,	0,	0,			0,	0,			0,	0		)
+	local Hhu11 = hueCalc("hhu",	10,	12,	2,	360/18*10,	2,	360/12*10,	0,	0,			0,	0,			0,	0		)
+	local Hhu12 = hueCalc("hhu",	11,	12,	2,	360/18*11,	2,	360/12*11,	0,	0,			0,	0,			0,	0		)
+	local Hhu13 = hueCalc("hhu",	12,	18,	2,	360/18*12,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Hhu14 = hueCalc("hhu",	13,	18,	2,	360/18*13,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Hhu15 = hueCalc("hhu",	14,	18,	2,	360/18*15,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Hhu16 = hueCalc("hhu",	15,	18,	2,	360/18*16,	0,	0,			0,	0,			0,	0,			0,	0		)
+	local Hhu17 = hueCalc("hhu",	16,	18,	2,	360/18*17,	0,	0,			0,	0,			0,	0,			0,	0		)
 
 -- DIALOG
 
@@ -324,6 +409,8 @@ local function reloadColors(windowBounds)
 		},
 		onchange = function()
 			AOC = dlg.data.amountOfColors
+			reloadColors(dlg.bounds)
+			dlg:close()
 		end
 	}
 	:combobox
@@ -340,6 +427,8 @@ local function reloadColors(windowBounds)
 		},
 		onchange = function()
 			AOH = dlg.data.amountOfHues
+			reloadColors(dlg.bounds)
+			dlg:close()
 		end
 	}
 	:label
@@ -374,7 +463,6 @@ local function reloadColors(windowBounds)
 			"Quad",
 			"Cubic",
 			"Circ",
-			"Linear",
 			"outSine",
 			"outQuad",
 			"outCubic",
@@ -382,6 +470,8 @@ local function reloadColors(windowBounds)
 		},
 		onchange = function()
 			HI = dlg.data.hueInterpolation
+			reloadColors(dlg.bounds)
+			dlg:close()
 		end
 	}
 	:combobox
@@ -403,6 +493,8 @@ local function reloadColors(windowBounds)
 		},
 		onchange = function()
 			SI = dlg.data.satInterpolation
+			reloadColors(dlg.bounds)
+			dlg:close()
 		end
 	}
 	:combobox
@@ -424,6 +516,8 @@ local function reloadColors(windowBounds)
 		},
 		onchange = function()
 			VI = dlg.data.valInterpolation
+			reloadColors(dlg.bounds)
+			dlg:close()
 		end
 	}
 	:combobox
@@ -445,6 +539,8 @@ local function reloadColors(windowBounds)
 		},
 		onchange = function()
 			AI = dlg.data.alphaInterpolation
+			reloadColors(dlg.bounds)
+			dlg:close()
 		end
 	}
 -- COLOR CONTROL END
