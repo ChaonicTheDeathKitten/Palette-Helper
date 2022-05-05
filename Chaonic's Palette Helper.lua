@@ -64,15 +64,10 @@ local easingValue
 	if position > maxPosition then
 		outputColor = Color()
 	else
-		easingValue = CM.hsvHue + easingValue
-		if easingValue >= 360 then
-			easingValue = easingValue - 360
-		newHue = easingValue
-		outputColor.hsvHue = newHue
-		end
-	return easingValue
-
+		easingValue = (CM.hsvHue + easingValue) % 360
+		outputColor.hsvHue = easingValue
 	end
+	return outputColor
 end
 
 
@@ -124,72 +119,7 @@ end
 
 local function hueCalc(method, position, easing18, easing12, easing8, easing6, easing4)
 	local outputColor = Color(CM)
-	if method == "shu" then
-		if AOH == "4" then
-			if position > 3 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		elseif AOH == "6" then
-			if position > 5 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		elseif AOH == "8" then
-			if position > 7 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		elseif AOH == "12" then
-			if position > 11 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		elseif AOH == "18" then
-			if position > 16 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		end
-	elseif method == "hhu" then
-		if AOH == "4" then
-			if position > 3 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		elseif AOH == "6" then
-			if position > 5 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		elseif AOH == "8" then
-			if position > 7 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		elseif AOH == "12" then
-			if position > 11 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		elseif AOH == "18" then
-			if position > 16 then
-				outputColor = Color()
-			else
-				outputColor.hsvHue = hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
-			end
-		end
-	end
-	return outputColor
+	return hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
 end
 
 -- RELOAD COLORS
