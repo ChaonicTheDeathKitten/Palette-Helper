@@ -6,6 +6,8 @@ local ColorLeft = Color{ r = 20, g = 20, b = 51, a = 255 }
 local ColorMain = app.fgColor
 local ColorRight = Color{ r = 230, g = 230, b = 195, a = 255 }
 local ColorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
+local maxAmountOfColors = 15
+local maxAmountOfHues = 12
 local amountOfColorsVar = "15"
 local amountOfHuesVar = "12"
 local hueInterpolationVar = "Standard"
@@ -19,12 +21,21 @@ local CL = ColorLeft
 local CM = ColorMain
 local CR = ColorRight
 local CC = ColorClipboard
+local MAC = maxAmountOfColors
+local MAH = maxAmountOfHues
 local AOC = amountOfColorsVar
 local AOH = amountOfHuesVar
 local HI = hueInterpolationVar
 local SI = satInterpolationVar
 local VI = valInterpolationVar
 local AI = alphaInterpolationVar
+
+-- SLIDER INPUT
+
+local function colorSlider()
+local leftOfCenter = true
+end
+
 
 -- COLOR CALCULATIONS
 
@@ -349,7 +360,7 @@ local function reloadColors(windowBounds)
 	}
 	:label
 	{
-		id=labelColorsLeft,
+		id = labelColorsLeft,
 		label = "Amount of:",
 		text= "Colors"
 	}
@@ -357,6 +368,36 @@ local function reloadColors(windowBounds)
 	{
 		id=labelColorsLeft,
 		text= "Hues"
+	}
+	:slider
+	{
+		id = "amountOfColorsSlider",
+		min=3,
+		max=32,
+		value=MAC,
+		onchange=function()
+			MAC = dlg.data.amountOfColorsSlider
+		end,
+		onrelease=function()
+			MAC = dlg.data.amountOfColorsSlider
+			reloadColors(dlg.bounds)
+			dlg:close()
+			end
+	}
+	:slider
+	{
+		id = "amountOfHuesSlider",
+		min=3,
+		max=32,
+		value=MAH,
+		onchange=function()
+			MAH = dlg.data.amountOfHuesSlider
+		end,
+		onrelease=function()
+			MAH = dlg.data.amountOfHuesSlider
+			reloadColors(dlg.bounds)
+			dlg:close()
+		end
 	}
 	:combobox
 	{
@@ -396,23 +437,23 @@ local function reloadColors(windowBounds)
 	}
 	:label
 	{
-		id=huelabel,
+		id = "huelabel",
 		label = "Interpolations: ",
-		text= "Hue"
+		text = "Hue"
 	}
 	:label
 	{
-		id=satlabel,
-		text= "Saturation"
+		id = "satlabel",
+		text = "Saturation"
 	}
 	:label
 	{
-		id=vallabel,
-		text= "Value"
+		id = "vallabel",
+		text = "Value"
 	}
 	:label
 	{
-		id=alphalabel,
+		id = "alphalabel",
 		text= "Alpha"
 	}
 	:combobox
@@ -726,6 +767,8 @@ local function reloadColors(windowBounds)
 			CM = app.fgColor
 			CR = ColorRight
 			CC = ColorClipboard
+			MAC = maxAmountOfColors
+			MAH = maxAmountOfHues
 			AOC = amountOfColorsVar
 			AOH = amountOfHuesVar
 			HI = hueInterpolationVar
@@ -746,10 +789,12 @@ local function reloadColors(windowBounds)
 		end
 	}
 	:button
-		{
+	{
 		id = "buttonCancel",
 		text = "Cancel",
 		onclick = function()
+		print (dlg.data.amountOfColorsSlider)
+		print (dlg.data.amountOfHuesSlider)
 		end
 	}
 	:show
