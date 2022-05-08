@@ -15,6 +15,7 @@ local satInterpolationVar = "Quad"
 local valInterpolationVar = "Quad"
 local alphaInterpolationVar = "Quad"
 
+
 -- CHANGED VALUES
 
 local CL = ColorLeft
@@ -30,11 +31,54 @@ local SI = satInterpolationVar
 local VI = valInterpolationVar
 local AI = alphaInterpolationVar
 
+
 -- SLIDER INPUT
 
-local function colorSlider()
-local leftOfCenter = true
+local function generateCalcTable()
+local hasCenter = false
+local copyColorAmount = MAC
+local tempTable = {}
+local calcTable = {}
+
+	-- If it has a center, remove and mark it
+	if copyColorAmount %2 == 1 then
+		copyColorAmount = copyColorAmount -1
+		hasCenter = true
+	end
+	
+	-- Halve the number, we'll mirror it later
+	copyColorAmount = copyColorAmount/2
+	
+	-- Let's get the actual numbers
+	local addNumber = 0
+	if hasCenter == true then
+		for i = 1 , copyColorAmount do
+			addNumber = math.abs(1-(i * (100/(copyColorAmount+1)))/100)
+			table.insert(tempTable, addNumber)
+		end
+		table.insert(tempTable, 0)
+		for i = 1 , copyColorAmount do
+			addNumber = (i * (100/(copyColorAmount+1)))/100
+			table.insert(tempTable, addNumber)
+		end
+	else
+		for i = 1 , copyColorAmount do
+			addNumber = ((100/copyColorAmount)*(copyColorAmount-(i*((copyColorAmount*2)/(copyColorAmount*2+1)))))/100
+			table.insert(tempTable, addNumber)
+		end
+		for i = 1 , copyColorAmount do
+			addNumber = ((100/copyColorAmount)*(math.abs((((copyColorAmount*2)/(copyColorAmount*2+1))*copyColorAmount)-copyColorAmount)+((i-1)*((copyColorAmount*2)/(copyColorAmount*2+1)))))/100
+			table.insert(tempTable, addNumber)
+		end
+	end
+	calcTable = tempTable
+	-- -- DEBUG
+	-- for k,v in pairs(tempTable) do
+	-- print(v)  
+	-- end
+	-- -- DEBUG END
 end
+
 
 
 -- COLOR CALCULATIONS
@@ -132,6 +176,7 @@ local function hueCalc(method, position, easing18, easing12, easing8, easing6, e
 	local outputColor = Color(CM)
 	return hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
 end
+
 
 -- RELOAD COLORS
 
@@ -793,8 +838,7 @@ local function reloadColors(windowBounds)
 		id = "buttonCancel",
 		text = "Cancel",
 		onclick = function()
-		print (dlg.data.amountOfColorsSlider)
-		print (dlg.data.amountOfHuesSlider)
+			generateCalcTable()
 		end
 	}
 	:show
