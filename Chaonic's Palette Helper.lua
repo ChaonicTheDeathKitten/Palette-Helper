@@ -291,7 +291,7 @@ end
 
 -- COLOR TABLE GENERATION
 
-local function genericColorTable()
+local function generateColorTable()
 	genericColorTable = {}
 	for i = 1 , MAC do
 		table.insert(genericColorTable, CM)
@@ -444,10 +444,9 @@ local function reloadColors(windowBounds)
 	
 	-- First, let's get the calculation table and the generic palette
 	generateCalcTable()
-	genericColorTable()
+	generateColorTable()
 
 -- COLOR TABLE
-
 
 -- SOFT HUE
 	local Shu1 = hueCalc("shu",		0,	0,			0,			0,			0,			0		)
