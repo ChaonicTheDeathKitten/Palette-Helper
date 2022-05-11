@@ -381,52 +381,6 @@ local easingValue
 end
 
 
-local function colorCalc(method, position, minAOC, leftOrRight15, easing15, leftOrRight13, easing13, leftOrRight11, easing11, leftOrRight9, easing9, leftOrRight7, easing7)
-	outputColor = Color()
-	if method == "sha" then
-		-- Just use CM for now!
-		outputColor = CM
-	elseif method == "ssh" then
-		-- Just use CM for now!
-		outputColor = CM
-	elseif method == "lig" then
-		-- Just use CM for now!
-		outputColor = CM
-	elseif method == "slg" then
-		-- Just use CM for now!
-		outputColor = CM
-	elseif method == "sat" then
-		-- Just use CM for now!
-		outputColor = CM
-	elseif method == "sst" then
-		-- Just use CM for now!
-		outputColor = CM
-	else
-		print ("ERROR: Calculation method unknown. It is currently ", method, "... That's not on the list. Have you messed with the colorCalc function or the calculation table?")
-	end
-	-- if HI == "Standard" then
-		-- hello = yes
-	-- elseif HI == "Sine" then
-		-- print ("Using Sine easing calculation")
-	-- elseif HI == "Quad" then
-		-- print ("Using Quad easing calculation")
-	-- elseif HI == "Cubic" then
-		-- print ("Using Cubic easing calculation")
-	-- elseif HI == "Circ" then
-		-- print ("Using Circ easing calculation")
-	-- elseif HI == "outSine" then
-		-- print ("Using outSine easing calculation")
-	-- elseif HI == "outQuad" then
-		-- print ("Using outQuad easing calculation")
-	-- elseif HI == "outCubic" then
-		-- print ("Using outCubic easing calculation")
-	-- elseif HI == "outCirc" then
-		-- print ("Using outCirc easing calculation")
-	-- else
-		-- print ("ERROR: Hue Interpolation method unknown. It is currently ", HI,"... That's not on the list. Have you messed with the hueEasing function or the hueInterpolation combobox?")
-	return outputColor
-end
-
 local function hueCalc(method, position, easing18, easing12, easing8, easing6, easing4)
 	local outputColor = Color(CM)
 	return hueEasing(method, position, easing4, easing6, easing8, easing12, easing18, outputColor)
