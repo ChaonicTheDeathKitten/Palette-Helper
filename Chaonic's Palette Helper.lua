@@ -19,7 +19,7 @@ local amountOfColorsVar = "15"
 local amountOfHuesVar = "12"
 local hueInterpolationVar = "Standard"
 local satInterpolationVar = "Quad"
-local valInterpolationVar = "Quad"
+local valInterpolationVar = "Standard"
 local alphaInterpolationVar = "Quad"
 local calcTable = {}
 local genericColorTable = {}
@@ -294,13 +294,14 @@ end
 local function genericColorTable()
 	genericColorTable = {}
 	for i = 1 , MAC do
-		table.insert(genericColorTable, ColorMain)
+		table.insert(genericColorTable, CM)
 	end
 end
 
-local function paletteLight(genericColorTable)
-	local paletteLight = genericColorTable
+local function paletteLightCalc()
+	local paletteLight = {}
 	local copyColorAmount = MAC
+	local secondRound = 0
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -316,9 +317,22 @@ local function paletteLight(genericColorTable)
 	for i = 1, copyColorAmount do
 		local tempColor = CM
 		local black = 0
-		local white = 255
-		tempColor.value = 0 -- NOT 0... CONTINUE HERE
+		print(CM.value, " ",black, " ",black-CM.value, " ",CT[i])
+		tempColor.value = doValEasingCalc(tempColor.hsvValue, black, black-tempColor.hsvValue, CT[i])
+		table.insert(paletteLight, tempColor)
 	end
+	secondRound = copyColorAmount
+	if hasCenter == true then
+		table.insert(paletteLight, CM)
+		secondRound = secondRound + 1
+	end
+	for i = 1, copyColorAmount do
+		local tempColor = CM
+		local white = 255
+		tempColor.value = doValEasingCalc(tempColor.hsvValue, white, white-tempColor.hsvValue, CT[i+secondRound])
+		table.insert(paletteLight, tempColor)
+	end
+	return paletteLight
 end
 
 
@@ -434,107 +448,6 @@ local function reloadColors(windowBounds)
 
 -- COLOR TABLE
 
--- SHADE
-	local Sha1 = colorCalc("sha",	1,	7,	1,	100/8*7,	1,	100/7*6,	1,	100/6*5,	1,	100/5*4,	1,	100/4*3	)
-	local Sha2 = colorCalc("sha",	2,	7,	1,	100/8*6,	1,	100/7*5,	1,	100/6*4,	1,	100/5*3,	1,	100/4*2	)
-	local Sha3 = colorCalc("sha",	3,	7,	1,	100/8*5,	1,	100/7*4,	1,	100/6*3,	1,	100/5*2,	1,	100/4	)
-	local Sha4 = colorCalc("sha",	4,	7,	1,	100/8*4,	1,	100/7*3,	1,	100/6*2,	1,	100/5,		2,	0		)
-	local Sha5 = colorCalc("sha",	5,	7,	1,	100/8*3,	1,	100/7*2,	1,	100/6,		2,	0,			3,	100/4	)
-	local Sha6 = colorCalc("sha",	6,	7,	1,	100/8*2,	1,	100/7, 		2,	0,			3,	100/5,		3,	100/4*2	)
-	local Sha7 = colorCalc("sha",	7,	7,	1,	100/8,		2,	0,			3,	100/6,		3,	100/5*2,	3,	100/4*3	)
-	local Sha8 = colorCalc("sha",	8,	9,	2,	0,			3,	100/7,		3,	100/6*2,	3,	100/5*3,	0,	0		)
-	local Sha9 = colorCalc("sha",	9,	9,	3,	100/8,		3,	100/7*2,	3,	100/6*3,	3,	100/5*4,	0,	0		)
-	local Sha10 = colorCalc("sha",	10,	11,	3,	100/8*2,	3,	100/7*3,	3,	100/6*4,	0,	0,			0,	0		)
-	local Sha11 = colorCalc("sha",	11,	11,	3,	100/8*3,	3,	100/7*4,	3,	100/6*5,	0,	0,			0,	0		)
-	local Sha12 = colorCalc("sha",	12,	13,	3,	100/8*4,	3,	100/7*5,	0,	0,			0,	0,			0,	0		)
-	local Sha13 = colorCalc("sha",	13,	13,	3,	100/8*5,	3,	100/7*6,	0,	0,			0,	0,			0,	0		)
-	local Sha14 = colorCalc("sha",	14,	15,	3,	100/8*6,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Sha15 = colorCalc("sha",	15,	15,	3,	100/8*7,	0,	0,			0,	0,			0,	0,			0,	0		)
-
--- SOFT SHADE
-	local Ssh1 = colorCalc("ssh",	1,	7,	1,	100/8*7,	1,	100/7*6,	1,	100/6*5,	1,	100/5*4,	1,	100/4*3	)
-	local Ssh2 = colorCalc("ssh",	2,	7,	1,	100/8*6,	1,	100/7*5,	1,	100/6*4,	1,	100/5*3,	1,	100/4*2	)
-	local Ssh3 = colorCalc("ssh",	3,	7,	1,	100/8*5,	1,	100/7*4,	1,	100/6*3,	1,	100/5*2,	1,	100/4	)
-	local Ssh4 = colorCalc("ssh",	4,	7,	1,	100/8*4,	1,	100/7*3,	1,	100/6*2,	1,	100/5,		2,	0		)
-	local Ssh5 = colorCalc("ssh",	5,	7,	1,	100/8*3,	1,	100/7*2,	1,	100/6,		2,	0,			3,	100/4	)
-	local Ssh6 = colorCalc("ssh",	6,	7,	1,	100/8*2,	1,	100/7, 		2,	0,			3,	100/5,		3,	100/4*2	)
-	local Ssh7 = colorCalc("ssh",	7,	7,	1,	100/8,		2,	0,			3,	100/6,		3,	100/5*2,	3,	100/4*3	)
-	local Ssh8 = colorCalc("ssh",	8,	9,	2,	0,			3,	100/7,		3,	100/6*2,	3,	100/5*3,	0,	0		)
-	local Ssh9 = colorCalc("ssh",	9,	9,	3,	100/8,		3,	100/7*2,	3,	100/6*3,	3,	100/5*4,	0,	0		)
-	local Ssh10 = colorCalc("ssh",	10,	11,	3,	100/8*2,	3,	100/7*3,	3,	100/6*4,	0,	0,			0,	0		)
-	local Ssh11 = colorCalc("ssh",	11,	11,	3,	100/8*3,	3,	100/7*4,	3,	100/6*5,	0,	0,			0,	0		)
-	local Ssh12 = colorCalc("ssh",	12,	13,	3,	100/8*4,	3,	100/7*5,	0,	0,			0,	0,			0,	0		)
-	local Ssh13 = colorCalc("ssh",	13,	13,	3,	100/8*5,	3,	100/7*6,	0,	0,			0,	0,			0,	0		)
-	local Ssh14 = colorCalc("ssh",	14,	15,	3,	100/8*6,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Ssh15 = colorCalc("ssh",	15,	15,	3,	100/8*7,	0,	0,			0,	0,			0,	0,			0,	0		)
-
--- LIGHT
-	local Lig1 = colorCalc("lig",	1,	7,	1,	100/8*7,	1,	100/7*6,	1,	100/6*5,	1,	100/5*4,	1,	100/4*3	)
-	local Lig2 = colorCalc("lig",	2,	7,	1,	100/8*6,	1,	100/7*5,	1,	100/6*4,	1,	100/5*3,	1,	100/4*2	)
-	local Lig3 = colorCalc("lig",	3,	7,	1,	100/8*5,	1,	100/7*4,	1,	100/6*3,	1,	100/5*2,	1,	100/4	)
-	local Lig4 = colorCalc("lig",	4,	7,	1,	100/8*4,	1,	100/7*3,	1,	100/6*2,	1,	100/5,		2,	0		)
-	local Lig5 = colorCalc("lig",	5,	7,	1,	100/8*3,	1,	100/7*2,	1,	100/6,		2,	0,			3,	100/4	)
-	local Lig6 = colorCalc("lig",	6,	7,	1,	100/8*2,	1,	100/7, 		2,	0,			3,	100/5,		3,	100/4*2	)
-	local Lig7 = colorCalc("lig",	7,	7,	1,	100/8,		2,	0,			3,	100/6,		3,	100/5*2,	3,	100/4*3	)
-	local Lig8 = colorCalc("lig",	8,	9,	2,	0,			3,	100/7,		3,	100/6*2,	3,	100/5*3,	0,	0		)
-	local Lig9 = colorCalc("lig",	9,	9,	3,	100/8,		3,	100/7*2,	3,	100/6*3,	3,	100/5*4,	0,	0		)
-	local Lig10 = colorCalc("lig",	10,	11,	3,	100/8*2,	3,	100/7*3,	3,	100/6*4,	0,	0,			0,	0		)
-	local Lig11 = colorCalc("lig",	11,	11,	3,	100/8*3,	3,	100/7*4,	3,	100/6*5,	0,	0,			0,	0		)
-	local Lig12 = colorCalc("lig",	12,	13,	3,	100/8*4,	3,	100/7*5,	0,	0,			0,	0,			0,	0		)
-	local Lig13 = colorCalc("lig",	13,	13,	3,	100/8*5,	3,	100/7*6,	0,	0,			0,	0,			0,	0		)
-	local Lig14 = colorCalc("lig",	14,	15,	3,	100/8*6,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Lig15 = colorCalc("lig",	15,	15,	3,	100/8*7,	0,	0,			0,	0,			0,	0,			0,	0		)
-
--- SOFT LIGHT
-	local Slg1 = colorCalc("slg",	1,	7,	1,	100/8*7,	1,	100/7*6,	1,	100/6*5,	1,	100/5*4,	1,	100/4*3	)
-	local Slg2 = colorCalc("slg",	2,	7,	1,	100/8*6,	1,	100/7*5,	1,	100/6*4,	1,	100/5*3,	1,	100/4*2	)
-	local Slg3 = colorCalc("slg",	3,	7,	1,	100/8*5,	1,	100/7*4,	1,	100/6*3,	1,	100/5*2,	1,	100/4	)
-	local Slg4 = colorCalc("slg",	4,	7,	1,	100/8*4,	1,	100/7*3,	1,	100/6*2,	1,	100/5,		2,	0		)
-	local Slg5 = colorCalc("slg",	5,	7,	1,	100/8*3,	1,	100/7*2,	1,	100/6,		2,	0,			3,	100/4	)
-	local Slg6 = colorCalc("slg",	6,	7,	1,	100/8*2,	1,	100/7, 		2,	0,			3,	100/5,		3,	100/4*2	)
-	local Slg7 = colorCalc("slg",	7,	7,	1,	100/8,		2,	0,			3,	100/6,		3,	100/5*2,	3,	100/4*3	)
-	local Slg8 = colorCalc("slg",	8,	9,	2,	0,			3,	100/7,		3,	100/6*2,	3,	100/5*3,	0,	0		)
-	local Slg9 = colorCalc("slg",	9,	9,	3,	100/8,		3,	100/7*2,	3,	100/6*3,	3,	100/5*4,	0,	0		)
-	local Slg10 = colorCalc("slg",	10,	11,	3,	100/8*2,	3,	100/7*3,	3,	100/6*4,	0,	0,			0,	0		)
-	local Slg11 = colorCalc("slg",	11,	11,	3,	100/8*3,	3,	100/7*4,	3,	100/6*5,	0,	0,			0,	0		)
-	local Slg12 = colorCalc("slg",	12,	13,	3,	100/8*4,	3,	100/7*5,	0,	0,			0,	0,			0,	0		)
-	local Slg13 = colorCalc("slg",	13,	13,	3,	100/8*5,	3,	100/7*6,	0,	0,			0,	0,			0,	0		)
-	local Slg14 = colorCalc("slg",	14,	15,	3,	100/8*6,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Slg15 = colorCalc("slg",	15,	15,	3,	100/8*7,	0,	0,			0,	0,			0,	0,			0,	0		)
-
--- SATURATION
-	local Sat1 = colorCalc("sat",	1,	7,	1,	100/8*7,	1,	100/7*6,	1,	100/6*5,	1,	100/5*4,	1,	100/4*3	)
-	local Sat2 = colorCalc("sat",	2,	7,	1,	100/8*6,	1,	100/7*5,	1,	100/6*4,	1,	100/5*3,	1,	100/4*2	)
-	local Sat3 = colorCalc("sat",	3,	7,	1,	100/8*5,	1,	100/7*4,	1,	100/6*3,	1,	100/5*2,	1,	100/4	)
-	local Sat4 = colorCalc("sat",	4,	7,	1,	100/8*4,	1,	100/7*3,	1,	100/6*2,	1,	100/5,		2,	0		)
-	local Sat5 = colorCalc("sat",	5,	7,	1,	100/8*3,	1,	100/7*2,	1,	100/6,		2,	0,			3,	100/4	)
-	local Sat6 = colorCalc("sat",	6,	7,	1,	100/8*2,	1,	100/7, 		2,	0,			3,	100/5,		3,	100/4*2	)
-	local Sat7 = colorCalc("sat",	7,	7,	1,	100/8,		2,	0,			3,	100/6,		3,	100/5*2,	3,	100/4*3	)
-	local Sat8 = colorCalc("sat",	8,	9,	2,	0,			3,	100/7,		3,	100/6*2,	3,	100/5*3,	0,	0		)
-	local Sat9 = colorCalc("sat",	9,	9,	3,	100/8,		3,	100/7*2,	3,	100/6*3,	3,	100/5*4,	0,	0		)
-	local Sat10 = colorCalc("sat",	10,	11,	3,	100/8*2,	3,	100/7*3,	3,	100/6*4,	0,	0,			0,	0		)
-	local Sat11 = colorCalc("sat",	11,	11,	3,	100/8*3,	3,	100/7*4,	3,	100/6*5,	0,	0,			0,	0		)
-	local Sat12 = colorCalc("sat",	12,	13,	3,	100/8*4,	3,	100/7*5,	0,	0,			0,	0,			0,	0		)
-	local Sat13 = colorCalc("sat",	13,	13,	3,	100/8*5,	3,	100/7*6,	0,	0,			0,	0,			0,	0		)
-	local Sat14 = colorCalc("sat",	14,	15,	3,	100/8*6,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Sat15 = colorCalc("sat",	15,	15,	3,	100/8*7,	0,	0,			0,	0,			0,	0,			0,	0		)
-
--- SOFT SATURATION
-	local Sst1 = colorCalc("sst",	1,	7,	1,	100/8*7,	1,	100/7*6,	1,	100/6*5,	1,	100/5*4,	1,	100/4*3	)
-	local Sst2 = colorCalc("sst",	2,	7,	1,	100/8*6,	1,	100/7*5,	1,	100/6*4,	1,	100/5*3,	1,	100/4*2	)
-	local Sst3 = colorCalc("sst",	3,	7,	1,	100/8*5,	1,	100/7*4,	1,	100/6*3,	1,	100/5*2,	1,	100/4	)
-	local Sst4 = colorCalc("sst",	4,	7,	1,	100/8*4,	1,	100/7*3,	1,	100/6*2,	1,	100/5,		2,	0		)
-	local Sst5 = colorCalc("sst",	5,	7,	1,	100/8*3,	1,	100/7*2,	1,	100/6,		2,	0,			3,	100/4	)
-	local Sst6 = colorCalc("sst",	6,	7,	1,	100/8*2,	1,	100/7, 		2,	0,			3,	100/5,		3,	100/4*2	)
-	local Sst7 = colorCalc("sst",	7,	7,	1,	100/8,		2,	0,			3,	100/6,		3,	100/5*2,	3,	100/4*3	)
-	local Sst8 = colorCalc("sst",	8,	9,	2,	0,			3,	100/7,		3,	100/6*2,	3,	100/5*3,	0,	0		)
-	local Sst9 = colorCalc("sst",	9,	9,	3,	100/8,		3,	100/7*2,	3,	100/6*3,	3,	100/5*4,	0,	0		)
-	local Sst10 = colorCalc("sst",	10,	11,	3,	100/8*2,	3,	100/7*3,	3,	100/6*4,	0,	0,			0,	0		)
-	local Sst11 = colorCalc("sst",	11,	11,	3,	100/8*3,	3,	100/7*4,	3,	100/6*5,	0,	0,			0,	0		)
-	local Sst12 = colorCalc("sst",	12,	13,	3,	100/8*4,	3,	100/7*5,	0,	0,			0,	0,			0,	0		)
-	local Sst13 = colorCalc("sst",	13,	13,	3,	100/8*5,	3,	100/7*6,	0,	0,			0,	0,			0,	0		)
-	local Sst14 = colorCalc("sst",	14,	15,	3,	100/8*6,	0,	0,			0,	0,			0,	0,			0,	0		)
-	local Sst15 = colorCalc("sst",	15,	15,	3,	100/8*7,	0,	0,			0,	0,			0,	0,			0,	0		)
 
 -- SOFT HUE
 	local Shu1 = hueCalc("shu",		0,	0,			0,			0,			0,			0		)
@@ -846,7 +759,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteShade",
 		label = "Shade",
-		colors = {Sha1, Sha2, Sha3, Sha4, Sha5, Sha6, Sha7, Sha8, Sha9, Sha10, Sha11, Sha12, Sha13, Sha14, Sha15},
+		colors = genericColorTable,
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -873,7 +786,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteSoftShade",
 		label = "Soft Shade",
-		colors = {Ssh1, Ssh2, Ssh3, Ssh4, Ssh5, Ssh6, Ssh7, Ssh8, Ssh9, Ssh10, Ssh11, Ssh12, Ssh13, Ssh14, Ssh15},
+		colors = genericColorTable,
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -900,7 +813,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteLight",
 		label = "Light",
-		colors = {Lig1, Lig2, Lig3, Lig4, Lig5, Lig6, Lig7, Lig8, Lig9, Lig10, Lig11, Lig12, Lig13, Lig14, Lig15},
+		colors = genericColorTable,
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -927,7 +840,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteSoftLight",
 		label = "Soft Light",
-		colors = {Slg1, Slg2, Slg3, Slg4, Slg5, Slg6, Slg7, Slg8, Slg9, Slg10, Slg11, Slg12, Slg13, Slg14, Slg15},
+		colors = genericColorTable,
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -954,7 +867,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteSaturation",
 		label = "Saturation",
-		colors = {Sat1, Sat2, Sat3, Sat4, Sat5, Sat6, Sat7, Sat8, Sat9, Sat10, Sat11, Sat12, Sat13, Sat14, Sat15},
+		colors = genericColorTable,
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -981,7 +894,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteSoftSaturation",
 		label = "Soft Sat.",
-		colors = {Sst1, Sst2, Sst3, Sst4, Sst5, Sst6, Sst7, Sst8, Sst9, Sst10, Sst11, Sst12, Sst13, Sst14, Sst15},
+		colors = genericColorTable,
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
