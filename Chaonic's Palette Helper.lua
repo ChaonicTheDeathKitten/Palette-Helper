@@ -1,5 +1,12 @@
 -- Chaonic's Palette Helper
 
+-- IF YOU MUST, MAKE CHANGES HERE
+
+local minColors = 3
+local maxColors = 32
+
+-- STOP MAKING CHANGES HERE, IF YOU DON'T KNOW WHAT YOU'RE DOING
+
 -- STANDARD VALUES
 
 local ColorLeft = Color{ r = 20, g = 20, b = 51, a = 255 }
@@ -14,6 +21,8 @@ local hueInterpolationVar = "Standard"
 local satInterpolationVar = "Quad"
 local valInterpolationVar = "Quad"
 local alphaInterpolationVar = "Quad"
+local calcTable = {}
+local genericColorTable = {}
 
 
 -- CHANGED VALUES
@@ -30,15 +39,215 @@ local HI = hueInterpolationVar
 local SI = satInterpolationVar
 local VI = valInterpolationVar
 local AI = alphaInterpolationVar
+local CT = calcTable
+local SHA = genericColorTable
+local SSH = genericColorTable
+local LIG = genericColorTable
+local SLG = genericColorTable
+local SAT = genericColorTable
+local SST = genericColorTable
+local SHU = genericColorTable
+local HHU = genericColorTable
 
 
--- SLIDER INPUT
+-- EASING CALCULATIONS
+
+-- These calculations were taken from https://github.com/EmmanuelOga/easing
+-- The authors of the LUA port are Yuichi Tateno and Emmanuel Oga
+
+--[[
+    MIT LICENSE
+    Copyright (c) 2014 Enrique García Cota, Yuichi Tateno, Emmanuel Oga
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the
+    "Software"), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+    OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  ]]
+
+-- For all easing functions:
+-- t = elapsed time
+-- b = begin
+-- c = change == ending - beginning
+-- d = duration (total time)
+
+local pow = math.pow
+local sin = math.sin
+local cos = math.cos
+local sqrt = math.sqrt
+
+local function linear(t, b, c, d)
+  return c * t / d + b
+end
+
+local function inQuad(t, b, c, d)
+  t = t / d
+  return c * pow(t, 2) + b
+end
+
+local function outQuad(t, b, c, d)
+  t = t / d
+  return -c * t * (t - 2) + b
+end
+
+local function inCubic (t, b, c, d)
+  t = t / d
+  return c * pow(t, 3) + b
+end
+
+local function outCubic(t, b, c, d)
+  t = t / d - 1
+  return c * (pow(t, 3) + 1) + b
+end
+
+local function inSine(t, b, c, d)
+  return -c * cos(t / d * (pi / 2)) + c + b
+end
+
+local function outSine(t, b, c, d)
+  return c * sin(t / d * (pi / 2)) + b
+end
+
+local function inCirc(t, b, c, d)
+  t = t / d
+  return(-c * (sqrt(1 - pow(t, 2)) - 1) + b)
+end
+
+local function outCirc(t, b, c, d)
+  t = t / d - 1
+  return(c * sqrt(1 - pow(t, 2)) + b)
+end
+
+
+
+local function doHueEasingCalc(t, b, c, d)
+	if HI == "Standard" then
+	local value = linear(t, b, c, d)
+	elseif HI == "Sine" then
+	local value = inSine(t, b, c, d)
+	elseif HI == "Quad" then
+	local value = inQuad(t, b, c, d)
+	elseif HI == "Cubic" then
+	local value = inCubic(t, b, c, d)
+	elseif HI == "Circ" then
+	local value = inCirc(t, b, c, d)
+	elseif HI == "outSine" then
+	local value = outSine(t, b, c, d)
+	elseif HI == "outQuad" then
+	local value = outQuad(t, b, c, d)
+	elseif HI == "outCubic" then
+	local value = outCubic(t, b, c, d)
+	elseif HI == "outCirc" then
+	local value = outCirc(t, b, c, d)
+	else
+	print("If you are adding calculation types for the hue, you should also add them to the 'doHueEasingCalc' function!")
+	value = 0
+	end
+	return(value)
+end
+
+local function doSatEasingCalc(t, b, c, d)
+	if SI == "Standard" then
+	local value = b
+	elseif SI == "Linear" then
+	local value = linear(t, b, c, d)
+	elseif SI == "Sine" then
+	local value = inSine(t, b, c, d)
+	elseif SI == "Quad" then
+	local value = inQuad(t, b, c, d)
+	elseif SI == "Cubic" then
+	local value = inCubic(t, b, c, d)
+	elseif SI == "Circ" then
+	local value = inCirc(t, b, c, d)
+	elseif SI == "outSine" then
+	local value = outSine(t, b, c, d)
+	elseif SI == "outQuad" then
+	local value = outQuad(t, b, c, d)
+	elseif SI == "outCubic" then
+	local value = outCubic(t, b, c, d)
+	elseif SI == "outCirc" then
+	local value = outCirc(t, b, c, d)
+	else
+	print("If you are adding calculation types for the saturation, you should also add them to the 'doSatEasingCalc' function!")
+	value = 0
+	end
+	return(value)
+end
+
+local function doValEasingCalc(t, b, c, d)
+	if VI == "Standard" then
+	local value = b
+	elseif VI == "Linear" then
+	local value = linear(t, b, c, d)
+	elseif VI == "Sine" then
+	local value = inSine(t, b, c, d)
+	elseif SI == "Quad" then
+	local value = inQuad(t, b, c, d)
+	elseif SI == "Cubic" then
+	local value = inCubic(t, b, c, d)
+	elseif SI == "Circ" then
+	local value = inCirc(t, b, c, d)
+	elseif SI == "outSine" then
+	local value = outSine(t, b, c, d)
+	elseif SI == "outQuad" then
+	local value = outQuad(t, b, c, d)
+	elseif SI == "outCubic" then
+	local value = outCubic(t, b, c, d)
+	elseif SI == "outCirc" then
+	local value = outCirc(t, b, c, d)
+	else
+	print("If you are adding calculation types for the value, you should also add them to the 'doValEasingCalc' function!")
+	value = 0
+	end
+	return(value)
+end
+
+local function doAlphaEasingCalc(t, b, c, d)
+	if AI == "Standard" then
+	local value = linear(t, b, c, d)
+	elseif AI == "Sine" then
+	local value = inSine(t, b, c, d)
+	elseif AI == "Quad" then
+	local value = inQuad(t, b, c, d)
+	elseif AI == "Cubic" then
+	local value = inCubic(t, b, c, d)
+	elseif AI == "Circ" then
+	local value = inCirc(t, b, c, d)
+	elseif AI == "outSine" then
+	local value = outSine(t, b, c, d)
+	elseif AI == "outQuad" then
+	local value = outQuad(t, b, c, d)
+	elseif AI == "outCubic" then
+	local value = outCubic(t, b, c, d)
+	elseif AI == "outCirc" then
+	local value = outCirc(t, b, c, d)
+	else
+	print("If you are adding calculation types for the hue, you should also add them to the 'doAlphaEasingCalc' function!")
+	value = 0
+	end
+	return(value)
+end
+
+
+-- END OF EASING CALCULATIONS
+
+-- CALCULATION TABLE GENERATION
 
 local function generateCalcTable()
 local hasCenter = false
 local copyColorAmount = MAC
 local tempTable = {}
-local calcTable = {}
 
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -71,7 +280,7 @@ local calcTable = {}
 			table.insert(tempTable, addNumber)
 		end
 	end
-	calcTable = tempTable
+	CT = tempTable
 	-- -- DEBUG
 	-- for k,v in pairs(tempTable) do
 	-- print(v)  
@@ -79,6 +288,38 @@ local calcTable = {}
 	-- -- DEBUG END
 end
 
+
+-- COLOR TABLE GENERATION
+
+local function genericColorTable()
+	genericColorTable = {}
+	for i = 1 , MAC do
+		table.insert(genericColorTable, ColorMain)
+	end
+end
+
+local function paletteLight(genericColorTable)
+	local paletteLight = genericColorTable
+	local copyColorAmount = MAC
+	
+	-- If it has a center, remove and mark it
+	if copyColorAmount %2 == 1 then
+		copyColorAmount = copyColorAmount -1
+		hasCenter = true
+	end
+	
+	-- Halve the number
+	copyColorAmount = copyColorAmount/2
+	
+	-- Let's get the actual table now
+	-- Starting with black to normal
+	for i = 1, copyColorAmount do
+		local tempColor = CM
+		local black = 0
+		local white = 255
+		tempColor.value = 0 -- NOT 0... CONTINUE HERE
+	end
+end
 
 
 -- COLOR CALCULATIONS
@@ -186,6 +427,10 @@ local function reloadColors(windowBounds)
 	{ 
 		title = "Chaonic's Palette Helper"
 	}
+	
+	-- First, let's get the calculation table and the generic palette
+	generateCalcTable()
+	genericColorTable()
 
 -- COLOR TABLE
 
@@ -417,8 +662,8 @@ local function reloadColors(windowBounds)
 	:slider
 	{
 		id = "amountOfColorsSlider",
-		min=3,
-		max=32,
+		min=minColors,
+		max=maxColors,
 		value=MAC,
 		onchange=function()
 			MAC = dlg.data.amountOfColorsSlider
@@ -432,8 +677,8 @@ local function reloadColors(windowBounds)
 	:slider
 	{
 		id = "amountOfHuesSlider",
-		min=3,
-		max=32,
+		min=minColors,
+		max=maxColors,
 		value=MAH,
 		onchange=function()
 			MAH = dlg.data.amountOfHuesSlider
@@ -530,11 +775,11 @@ local function reloadColors(windowBounds)
 		options =
 		{
 			"Standard",
+			"Linear",
 			"Sine",
 			"Quad",
 			"Cubic",
 			"Circ",
-			"Linear",
 			"outSine",
 			"outQuad",
 			"outCubic",
@@ -553,11 +798,11 @@ local function reloadColors(windowBounds)
 		options =
 		{
 			"Standard",
+			"Linear",
 			"Sine",
 			"Quad",
 			"Cubic",
 			"Circ",
-			"Linear",
 			"outSine",
 			"outQuad",
 			"outCubic",
@@ -580,7 +825,6 @@ local function reloadColors(windowBounds)
 			"Quad",
 			"Cubic",
 			"Circ",
-			"Linear",
 			"outSine",
 			"outQuad",
 			"outCubic",
