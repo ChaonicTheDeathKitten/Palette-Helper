@@ -19,7 +19,7 @@ local amountOfColorsVar = "15"
 local amountOfHuesVar = "12"
 local hueInterpolationVar = "Standard"
 local satInterpolationVar = "Quad"
-local valInterpolationVar = "Standard"
+local valInterpolationVar = "Quad"
 local alphaInterpolationVar = "Quad"
 local calcTable = {}
 local genericColorTable = {}
@@ -93,7 +93,7 @@ end
 
 local function inQuad(t, b, c, d)
   t = t / d
-  return c * pow(t, 2) + b
+  return c * t^2 + b
 end
 
 local function outQuad(t, b, c, d)
@@ -103,12 +103,12 @@ end
 
 local function inCubic (t, b, c, d)
   t = t / d
-  return c * pow(t, 3) + b
+  return c * t^3 + b
 end
 
 local function outCubic(t, b, c, d)
   t = t / d - 1
-  return c * (pow(t, 3) + 1) + b
+  return c * (t^3 + 1) + b
 end
 
 local function inSine(t, b, c, d)
@@ -121,12 +121,12 @@ end
 
 local function inCirc(t, b, c, d)
   t = t / d
-  return(-c * (sqrt(1 - pow(t, 2)) - 1) + b)
+  return(-c * (sqrt(1 - t^2) - 1) + b)
 end
 
 local function outCirc(t, b, c, d)
   t = t / d - 1
-  return(c * sqrt(1 - pow(t, 2)) + b)
+  return(c * sqrt(1 - t^2) + b)
 end
 
 
@@ -317,8 +317,8 @@ local function paletteLightCalc()
 	for i = 1, copyColorAmount do
 		local tempColor = CM
 		local black = 0
-		print(CM.value, " ",black, " ",black-CM.value, " ",CT[i])
-		tempColor.value = doValEasingCalc(tempColor.hsvValue, black, black-tempColor.hsvValue, CT[i])
+		print(CM.hsvValue, " ", black, " ", black - CM.hsvValue, " ",CT[i])
+		tempColor.hsvValue = doValEasingCalc(tempColor.hsvValue, black, black-tempColor.hsvValue, CT[i])
 		table.insert(paletteLight, tempColor)
 	end
 	secondRound = copyColorAmount
@@ -329,9 +329,14 @@ local function paletteLightCalc()
 	for i = 1, copyColorAmount do
 		local tempColor = CM
 		local white = 255
-		tempColor.value = doValEasingCalc(tempColor.hsvValue, white, white-tempColor.hsvValue, CT[i+secondRound])
+		tempColor.hsvValue = doValEasingCalc(tempColor.hsvValue, white, white - tempColor.hsvValue, CT[i+secondRound])
 		table.insert(paletteLight, tempColor)
 	end
+	-- DEBUG
+	for k,v in pairs(paletteLight) do
+	print(v)  
+	end
+	-- DEBUG END
 	return paletteLight
 end
 
@@ -766,7 +771,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteLight",
 		label = "Light",
-		colors = genericColorTable,
+		colors = paletteLightCalc(),
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
