@@ -82,7 +82,6 @@ local HHU = genericColorTable
 -- c = change == ending - beginning
 -- d = duration (total time)
 
-local pow = math.pow
 local sin = math.sin
 local cos = math.cos
 local sqrt = math.sqrt
@@ -93,7 +92,7 @@ end
 
 local function inQuad(t, b, c, d)
   t = t / d
-  return c * pow(t, 2) + b
+  return c * t^2 + b
 end
 
 local function outQuad(t, b, c, d)
@@ -302,8 +301,8 @@ local function paletteLightCalc()
 	local paletteLight = {}
 	local copyColorAmount = MAC
 	local secondRound = 0
-	local black = 0
-	local white = 255
+	local black = Color{ r=0, g=0, b=0, a=255 }
+	local white = Color{ r=255, g=255, b=255, a=255 }
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -311,35 +310,35 @@ local function paletteLightCalc()
 		hasCenter = true
 	end
 	
-	-- Halve the number
+	-- Halve the number and prepare the second round
 	copyColorAmount = copyColorAmount/2
+	secondRound = copyColorAmount
 	
 	-- Let's get the actual table now
 	-- Starting with black to normal
 	for i = 1, copyColorAmount do
 		local tempColor = CM
-		print(tempColor.hsvValue, " ", black, " ", black - tempColor.hsvValue, " ",CT[i])
-		tempColor.hsvValue = doValEasingCalc(tempColor.hsvValue, black, black-tempColor.hsvValue, CT[i])
-		table.insert(paletteLight, tempColor)
+		print(tempColor.lightness)
+		tempColor.lightness = inQuad(tempColor.lightness, black.lightness, black.lightness-tempColor.lightness, CT[i])
+		print(tempColor.lightness)
+		table.insert(paletteLight, Color(tempColor))
 	end
-	secondRound = copyColorAmount
-	-- If it has a center, just add the main color
+	-- If it has a center, just add the main color in the middle
 	if hasCenter == true then
 		table.insert(paletteLight, CM)
 		secondRound = secondRound + 1
 	end
 	-- Lastly, normal to white
-	for i = 1, copyColorAmount do
+	for y = 1, copyColorAmount do
 		local tempColor = CM
-		print(tempColor.hsvValue, " ", black, " ", black - tempColor.hsvValue, " ",CT[i])
-		tempColor.hsvValue = doValEasingCalc(tempColor.hsvValue, white, white - tempColor.hsvValue, CT[i+secondRound])
+		tempColor.lightness = inQuad(tempColor.lightness, white.lightness, white.lightness - tempColor.lightness, CT[y+secondRound])
 		table.insert(paletteLight, tempColor)
 	end
-	-- DEBUG
-	for k,v in pairs(paletteLight) do
-	print(v)  
-	end
-	-- DEBUG END
+	-- -- DEBUG
+	-- for k,v in pairs(paletteLight) do
+	-- print(v)  
+	-- end
+	-- -- DEBUG END
 	return paletteLight
 end
 
