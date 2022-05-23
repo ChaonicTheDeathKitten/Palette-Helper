@@ -19,7 +19,7 @@ local amountOfColorsVar = "15"
 local amountOfHuesVar = "12"
 local hueInterpolationVar = "Standard"
 local satInterpolationVar = "Quad"
-local valInterpolationVar = "Quad"
+local valInterpolationVar = "Sine"
 local alphaInterpolationVar = "Quad"
 local calcTable = {}
 local genericColorTable = {}
@@ -84,6 +84,7 @@ local HHU = genericColorTable
 
 local sin = math.sin
 local cos = math.cos
+local pi = math.pi
 local sqrt = math.sqrt
 
 local function linear(t, b, c, d)
@@ -301,8 +302,7 @@ local function paletteLightCalc()
 	local paletteLight = {}
 	local copyColorAmount = MAC
 	local secondRound = 0
-	local black = Color{ r=0, g=0, b=0, a=255 }
-	local white = Color{ r=255, g=255, b=255, a=255 }
+	local hasCenter = false
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -317,11 +317,35 @@ local function paletteLightCalc()
 	-- Let's get the actual table now
 	-- Starting with black to normal
 	for i = 1, copyColorAmount do
-		local tempColor = CM
-		print(tempColor.lightness)
-		tempColor.lightness = inQuad(tempColor.lightness, black.lightness, black.lightness-tempColor.lightness, CT[i])
-		print(tempColor.lightness)
-		table.insert(paletteLight, Color(tempColor))
+		local tempColor = Color{}
+		tempColor.red = CM.red
+		tempColor.green = CM.green
+		tempColor.blue = CM.blue
+		tempColor.alpha = CM.alpha
+		-- print (tempColor.lightness)
+		if VI == "Standard" then
+			tempColor.lightness = linear(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "Linear" then
+			tempColor.lightness = linear(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "Sine" then
+			tempColor.lightness = inSine(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "Quad" then
+			tempColor.lightness = inQuad(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "Cubic" then
+			tempColor.lightness = inCubic(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "Circ" then
+			tempColor.lightness = inCirc(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "outSine" then
+			tempColor.lightness = outSine(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "outQuad" then
+			tempColor.lightness = outQuad(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "outCubic" then
+			tempColor.lightness = outCubic(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		elseif VI == "outCirc" then
+			tempColor.lightness = outCirc(CT[i], tempColor.lightness, 0-tempColor.lightness, 1)
+		end
+		-- print (tempColor.lightness)
+		table.insert(paletteLight, tempColor)
 	end
 	-- If it has a center, just add the main color in the middle
 	if hasCenter == true then
@@ -330,8 +354,34 @@ local function paletteLightCalc()
 	end
 	-- Lastly, normal to white
 	for y = 1, copyColorAmount do
-		local tempColor = CM
-		tempColor.lightness = inQuad(tempColor.lightness, white.lightness, white.lightness - tempColor.lightness, CT[y+secondRound])
+		local tempColor = Color{}
+		tempColor.red = CM.red
+		tempColor.green = CM.green
+		tempColor.blue = CM.blue
+		tempColor.alpha = CM.alpha
+		-- print (CT[y+secondRound])
+		if VI == "Standard" then
+			tempColor.lightness = linear(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "Linear" then
+			tempColor.lightness = linear(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "Sine" then
+			tempColor.lightness = inSine(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "Quad" then
+			tempColor.lightness = inQuad(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "Cubic" then
+			tempColor.lightness = inCubic(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "Circ" then
+			tempColor.lightness = inCirc(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "outSine" then
+			tempColor.lightness = outSine(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "outQuad" then
+			tempColor.lightness = outQuad(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "outCubic" then
+			tempColor.lightness = outCubic(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		elseif VI == "outCirc" then
+			tempColor.lightness = outCirc(CT[y+secondRound], tempColor.lightness, 1-tempColor.lightness, 1)
+		end
+		-- print (tempColor.lightness)
 		table.insert(paletteLight, tempColor)
 	end
 	-- -- DEBUG
@@ -342,6 +392,99 @@ local function paletteLightCalc()
 	return paletteLight
 end
 
+local function paletteSaturationCalc()
+	local paletteSaturation = {}
+	local copyColorAmount = MAC
+	local secondRound = 0
+	local hasCenter = false
+	
+	-- If it has a center, remove and mark it
+	if copyColorAmount %2 == 1 then
+		copyColorAmount = copyColorAmount -1
+		hasCenter = true
+	end
+	
+	-- Halve the number and prepare the second round
+	copyColorAmount = copyColorAmount/2
+	secondRound = copyColorAmount
+	
+	-- Let's get the actual table now
+	-- Starting with desaturated to normal
+	for i = 1, copyColorAmount do
+		local tempColor = Color{}
+		tempColor.red = CM.red
+		tempColor.green = CM.green
+		tempColor.blue = CM.blue
+		tempColor.alpha = CM.alpha
+		-- print (tempColor.saturation)
+		if VI == "Standard" then
+			tempColor.saturation = linear(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "Linear" then
+			tempColor.saturation = linear(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "Sine" then
+			tempColor.saturation = inSine(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "Quad" then
+			tempColor.saturation = inQuad(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "Cubic" then
+			tempColor.saturation = inCubic(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "Circ" then
+			tempColor.saturation = inCirc(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "outSine" then
+			tempColor.saturation = outSine(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "outQuad" then
+			tempColor.saturation = outQuad(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "outCubic" then
+			tempColor.saturation = outCubic(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif VI == "outCirc" then
+			tempColor.saturation = outCirc(CT[i], tempColor.saturation, 0-tempColor.saturation, 1)
+		end
+		-- print (tempColor.saturation)
+		table.insert(paletteSaturation, tempColor)
+	end
+	-- If it has a center, just add the main color in the middle
+	if hasCenter == true then
+		table.insert(paletteSaturation, CM)
+		secondRound = secondRound + 1
+	end
+	-- Lastly, normal to saturated
+	for y = 1, copyColorAmount do
+		local tempColor = Color{}
+		tempColor.red = CM.red
+		tempColor.green = CM.green
+		tempColor.blue = CM.blue
+		tempColor.alpha = CM.alpha
+		-- print (CT[y+secondRound])
+		if VI == "Standard" then
+			tempColor.saturation = linear(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "Linear" then
+			tempColor.saturation = linear(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "Sine" then
+			tempColor.saturation = inSine(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "Quad" then
+			tempColor.saturation = inQuad(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "Cubic" then
+			tempColor.saturation = inCubic(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "Circ" then
+			tempColor.saturation = inCirc(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "outSine" then
+			tempColor.saturation = outSine(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "outQuad" then
+			tempColor.saturation = outQuad(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "outCubic" then
+			tempColor.saturation = outCubic(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif VI == "outCirc" then
+			tempColor.saturation = outCirc(CT[y+secondRound], tempColor.saturation, 1-tempColor.saturation, 1)
+		end
+		-- print (tempColor.saturation)
+		table.insert(paletteSaturation, tempColor)
+	end
+	-- -- DEBUG
+	-- for k,v in pairs(paletteSaturation) do
+	-- print(v)  
+	-- end
+	-- -- DEBUG END
+	return paletteSaturation
+end
 
 -- COLOR CALCULATIONS
 
@@ -612,7 +755,7 @@ local function reloadColors(windowBounds)
 	:label
 	{
 		id = "vallabel",
-		text = "Value"
+		text = "Value/Light"
 	}
 	:label
 	{
@@ -827,7 +970,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteSaturation",
 		label = "Saturation",
-		colors = genericColorTable,
+		colors = paletteSaturationCalc(),
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
