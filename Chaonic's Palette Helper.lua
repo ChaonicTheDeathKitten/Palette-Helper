@@ -9,12 +9,13 @@ local maxColors = 32
 
 -- STANDARD VALUES
 
-local ColorLeft = Color{ r = 20, g = 20, b = 51, a = 255 }
-local ColorMain = app.fgColor
-local ColorRight = Color{ r = 230, g = 230, b = 195, a = 255 }
-local ColorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
+local colorLeft = Color{ r = 0, g = 0, b = 20, a = 255 }
+local colorMain = app.fgColor
+local colorRight = Color{ r = 240, g = 240, b = 220, a = 255 }
+local colorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
 local amountOfColorsVar = 15
 local amountOfHuesVar = 12
+local amountOfSoftHuesVar = 6
 local hueStrength = 100
 local satStrength = 100
 local valStrenght = 100
@@ -29,12 +30,13 @@ local genericColorTable = {}
 
 -- CHANGED VALUES
 
-local CL = ColorLeft
-local CM = ColorMain
-local CR = ColorRight
-local CC = ColorClipboard
+local CL = colorLeft
+local CM = colorMain
+local CR = colorRight
+local CC = colorClipboard
 local AOC = amountOfColorsVar
 local AOH = amountOfHuesVar
+local AOSH = amountOfSoftHuesVar
 local HS = hueStrength
 local SS = satStrength
 local VS = valStrenght
@@ -44,14 +46,6 @@ local SI = satInterpolationVar
 local VI = valInterpolationVar
 local AI = alphaInterpolationVar
 local CT = calcTable
-local SHA = genericColorTable
-local SSH = genericColorTable
-local LIG = genericColorTable
-local SLG = genericColorTable
-local SAT = genericColorTable
-local SST = genericColorTable
-local SHU = genericColorTable
-local HHU = genericColorTable
 
 
 -- EASING CALCULATIONS
@@ -192,6 +186,192 @@ local function generateColorTable()
 	end
 end
 
+
+local function paletteShadeCalc()
+	paletteShade = {}
+	local copyColorAmount = AOC
+	local secondRound = 0
+	local hasCenter = false
+
+	
+	-- If it has a center, remove and mark it
+	if copyColorAmount %2 == 1 then
+		copyColorAmount = copyColorAmount -1
+		hasCenter = true
+	end
+	
+	-- Halve the number and prepare the second round
+	copyColorAmount = copyColorAmount/2
+	secondRound = copyColorAmount
+	
+	-- Let's get the actual table now
+	-- Starting with left color to main color
+	for i = 1, copyColorAmount do
+		local tempColor = Color{}
+		tempColor.red = CM.red
+		tempColor.green = CM.green
+		tempColor.blue = CM.blue
+		tempColor.alpha = CM.alpha
+		if HI == "Standard" then
+			tempColor.red = linear(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = linear(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = linear(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = linear(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		elseif HI == "Sine" then
+			tempColor.red = inSine(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = inSine(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = inSine(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = inSine(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		elseif HI == "Quad" then
+			tempColor.red = inQuad(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = inQuad(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = inQuad(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = inQuad(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		elseif HI == "Cubic" then
+			tempColor.red = inCubic(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = inCubic(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = inCubic(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = inCubic(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		elseif HI == "Circ" then
+			tempColor.red = inCirc(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = inCirc(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = inCirc(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = inCirc(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		elseif HI == "outSine" then
+			tempColor.red = outSine(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = outSine(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = outSine(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = outSine(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		elseif HI == "outQuad" then
+			tempColor.red = outQuad(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = outQuad(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = outQuad(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = outQuad(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		elseif HI == "outCubic" then
+			tempColor.red = outCubic(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = outCubic(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = outCubic(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = outCubic(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		elseif HI == "outCirc" then
+			tempColor.red = outCirc(CT[i]*(HS/100), tempColor.red, CL.red-tempColor.red, 1)
+			tempColor.green = outCirc(CT[i]*(HS/100), tempColor.green, CL.green-tempColor.green, 1)
+			tempColor.blue = outCirc(CT[i]*(HS/100), tempColor.blue, CL.blue-tempColor.blue, 1)
+			tempColor.alpha = outCirc(CT[i]*(HS/100), tempColor.alpha, CL.alpha-tempColor.alpha, 1)
+		end
+		if SI == "Standard" then
+			tempColor.saturation = tempColor.saturation
+		elseif SI == "Linear" then
+			tempColor.saturation = linear(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		elseif SI == "Sine" then
+			tempColor.saturation = inSine(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		elseif SI == "Quad" then
+			tempColor.saturation = inQuad(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		elseif SI == "Cubic" then
+			tempColor.saturation = inCubic(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		elseif SI == "Circ" then
+			tempColor.saturation = inCirc(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		elseif SI == "outSine" then
+			tempColor.saturation = outSine(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		elseif SI == "outQuad" then
+			tempColor.saturation = outQuad(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		elseif SI == "outCubic" then
+			tempColor.saturation = outCubic(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		elseif SI == "outCirc" then
+			tempColor.saturation = outCirc(CT[i]*(SS/100), tempColor.saturation, CL.saturation-tempColor.saturation, 1)
+		end
+		table.insert(paletteShade, tempColor)
+	end
+	-- If it has a center, just add the main color in the middle
+	if hasCenter == true then
+		table.insert(paletteShade, CM)
+		secondRound = secondRound + 1
+	end
+	-- Lastly, main color to right color
+	for y = 1, copyColorAmount do
+		local tempColor = Color{}
+		tempColor.red = CM.red
+		tempColor.green = CM.green
+		tempColor.blue = CM.blue
+		tempColor.alpha = CM.alpha
+		if HI == "Standard" then
+			tempColor.red = linear(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = linear(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = linear(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = linear(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		elseif HI == "Sine" then
+			tempColor.red = inSine(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = inSine(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = inSine(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = inSine(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		elseif HI == "Quad" then
+			tempColor.red = inQuad(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = inQuad(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = inQuad(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = inQuad(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		elseif HI == "Cubic" then
+			tempColor.red = inCubic(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = inCubic(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = inCubic(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = inCubic(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		elseif HI == "Circ" then
+			tempColor.red = inCirc(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = inCirc(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = inCirc(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = inCirc(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		elseif HI == "outSine" then
+			tempColor.red = outSine(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = outSine(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = outSine(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = outSine(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		elseif HI == "outQuad" then
+			tempColor.red = outQuad(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = outQuad(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = outQuad(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = outQuad(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		elseif HI == "outCubic" then
+			tempColor.red = outCubic(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = outCubic(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = outCubic(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = outCubic(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		elseif HI == "outCirc" then
+			tempColor.red = outCirc(CT[y+secondRound]*(HS/100), tempColor.red, CR.red-tempColor.red, 1)
+			tempColor.green = outCirc(CT[y+secondRound]*(HS/100), tempColor.green, CR.green-tempColor.green, 1)
+			tempColor.blue = outCirc(CT[y+secondRound]*(HS/100), tempColor.blue, CR.blue-tempColor.blue, 1)
+			tempColor.alpha = outCirc(CT[y+secondRound]*(HS/100), tempColor.alpha, CR.alpha-tempColor.alpha, 1)
+		end
+		if SI == "Standard" then
+			tempColor.saturation = tempColor.saturation
+		elseif SI == "Linear" then
+			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		elseif SI == "Sine" then
+			tempColor.saturation = inSine(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		elseif SI == "Quad" then
+			tempColor.saturation = inQuad(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		elseif SI == "Cubic" then
+			tempColor.saturation = inCubic(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		elseif SI == "Circ" then
+			tempColor.saturation = inCirc(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		elseif SI == "outSine" then
+			tempColor.saturation = outSine(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		elseif SI == "outQuad" then
+			tempColor.saturation = outQuad(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		elseif SI == "outCubic" then
+			tempColor.saturation = outCubic(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		elseif SI == "outCirc" then
+			tempColor.saturation = outCirc(CT[y+secondRound]*(SS/100), tempColor.saturation, CR.saturation-tempColor.saturation, 1)
+		end
+		-- print (tempColor.saturation)
+		table.insert(paletteShade, tempColor)
+	end
+	-- -- DEBUG
+	-- for k,v in pairs(paletteShade) do
+	-- print(v)  
+	-- end
+	-- -- DEBUG END
+	return paletteShade
+end
+
+
 local function paletteLightCalc()
 	paletteLight = {}
 	local copyColorAmount = AOC
@@ -286,6 +466,7 @@ local function paletteLightCalc()
 	return paletteLight
 end
 
+
 local function paletteSaturationCalc()
 	paletteSaturation = {}
 	local copyColorAmount = AOC
@@ -311,26 +492,26 @@ local function paletteSaturationCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (tempColor.saturation)
-		if VI == "Standard" then
-			tempColor.saturation = linear(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "Linear" then
-			tempColor.saturation = linear(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "Sine" then
-			tempColor.saturation = inSine(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "Quad" then
-			tempColor.saturation = inQuad(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "Cubic" then
-			tempColor.saturation = inCubic(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "Circ" then
-			tempColor.saturation = inCirc(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "outSine" then
-			tempColor.saturation = outSine(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "outQuad" then
-			tempColor.saturation = outQuad(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "outCubic" then
-			tempColor.saturation = outCubic(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
-		elseif VI == "outCirc" then
-			tempColor.saturation = outCirc(CT[i]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		if SI == "Standard" then
+			tempColor.saturation = linear(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "Linear" then
+			tempColor.saturation = linear(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "Sine" then
+			tempColor.saturation = inSine(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "Quad" then
+			tempColor.saturation = inQuad(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "Cubic" then
+			tempColor.saturation = inCubic(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "Circ" then
+			tempColor.saturation = inCirc(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "outSine" then
+			tempColor.saturation = outSine(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "outQuad" then
+			tempColor.saturation = outQuad(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "outCubic" then
+			tempColor.saturation = outCubic(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		elseif SI == "outCirc" then
+			tempColor.saturation = outCirc(CT[i]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
 		end
 		-- print (tempColor.saturation)
 		table.insert(paletteSaturation, tempColor)
@@ -348,26 +529,26 @@ local function paletteSaturationCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (CT[y+secondRound])
-		if VI == "Standard" then
-			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "Linear" then
-			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "Sine" then
-			tempColor.saturation = inSine(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "Quad" then
-			tempColor.saturation = inQuad(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "Cubic" then
-			tempColor.saturation = inCubic(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "Circ" then
-			tempColor.saturation = inCirc(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "outSine" then
-			tempColor.saturation = outSine(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "outQuad" then
-			tempColor.saturation = outQuad(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "outCubic" then
-			tempColor.saturation = outCubic(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
-		elseif VI == "outCirc" then
-			tempColor.saturation = outCirc(CT[y+secondRound]*(SS/100), tempColor.saturation, 1-tempColor.saturation, 1)
+		if SI == "Standard" then
+			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "Linear" then
+			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "Sine" then
+			tempColor.saturation = inSine(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "Quad" then
+			tempColor.saturation = inQuad(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "Cubic" then
+			tempColor.saturation = inCubic(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "Circ" then
+			tempColor.saturation = inCirc(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "outSine" then
+			tempColor.saturation = outSine(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "outQuad" then
+			tempColor.saturation = outQuad(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "outCubic" then
+			tempColor.saturation = outCubic(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
+		elseif SI == "outCirc" then
+			tempColor.saturation = outCirc(CT[y+secondRound]*(SS/100), tempColor.saturation, 0-tempColor.saturation, 1)
 		end
 		-- print (tempColor.saturation)
 		table.insert(paletteSaturation, tempColor)
@@ -378,6 +559,142 @@ local function paletteSaturationCalc()
 	-- end
 	-- -- DEBUG END
 	return paletteSaturation
+end
+
+
+local function paletteHueCalc()
+	paletteHue = {}
+
+	for i = 1, AOH do
+		local tempColor = Color{}
+		tempColor.red = CM.red
+		tempColor.green = CM.green
+		tempColor.blue = CM.blue
+		tempColor.alpha = CM.alpha
+		-- print (tempColor.hue)
+		if HI == "Standard" then
+			tempColor.hue = linear((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "Sine" then
+			tempColor.hue = inSine((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "Quad" then
+			tempColor.hue = inQuad((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "Cubic" then
+			tempColor.hue = inCubic((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "Circ" then
+			tempColor.hue = inCirc((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "outSine" then
+			tempColor.hue = outSine((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "outQuad" then
+			tempColor.hue = outQuad((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "outCubic" then
+			tempColor.hue = outCubic((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "outCirc" then
+			tempColor.hue = outCirc((1/AOH)*(i-1), tempColor.hue, 360, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		end
+		-- print (tempColor.hue)
+		table.insert(paletteHue, tempColor)
+	end
+	-- -- DEBUG
+	-- for k,v in pairs(paletteHue) do
+	-- print(v)  
+	-- end
+	-- -- DEBUG END
+	return paletteHue
+end
+
+
+local function paletteSoftHueCalc()
+	paletteSoftHue = {}
+
+	for i = 1, AOSH do
+		local tempColor = Color{}
+		tempColor.red = CM.red
+		tempColor.green = CM.green
+		tempColor.blue = CM.blue
+		tempColor.alpha = CM.alpha
+		-- print (tempColor.hue)
+		if HI == "Standard" then
+			tempColor.hue = linear((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "Sine" then
+			tempColor.hue = inSine((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "Quad" then
+			tempColor.hue = inQuad((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "Cubic" then
+			tempColor.hue = inCubic((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "Circ" then
+			tempColor.hue = inCirc((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "outSine" then
+			tempColor.hue = outSine((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "outQuad" then
+			tempColor.hue = outQuad((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "outCubic" then
+			tempColor.hue = outCubic((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		elseif HI == "outCirc" then
+			tempColor.hue = outCirc((1/AOSH)*(i-1), tempColor.hue, 360/AOH, 1)
+			while tempColor.hue >= 360 do
+				tempColor.hue = tempColor.hue - 360
+			end
+		end
+		-- print (tempColor.hue)
+		table.insert(paletteSoftHue, tempColor)
+	end
+	-- -- DEBUG
+	-- for k,v in pairs(paletteHue) do
+	-- print(v)  
+	-- end
+	-- -- DEBUG END
+	return paletteSoftHue
 end
 
 
@@ -480,6 +797,11 @@ local function reloadColors(windowBounds)
 		id=labelColorsLeft,
 		text= "Hues"
 	}
+	:label
+	{
+		id=labelColorsLeft,
+		text= "Soft Hues"
+	}
 	:slider
 	{
 		id = "amountOfColorsSlider",
@@ -506,6 +828,21 @@ local function reloadColors(windowBounds)
 		end,
 		onrelease=function()
 			AOH = dlg.data.amountOfHuesSlider
+			reloadColors(dlg.bounds)
+			dlg:close()
+		end
+	}
+	:slider
+	{
+		id = "amountOfSoftHuesSlider",
+		min=minColors,
+		max=maxColors,
+		value=AOSH,
+		onchange=function()
+			AOSH = dlg.data.amountOfSoftHuesSlider
+		end,
+		onrelease=function()
+			AOSH = dlg.data.amountOfSoftHuesSlider
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
@@ -712,8 +1049,8 @@ local function reloadColors(windowBounds)
 	:shades
 	{
 		id = "paletteShade",
-		label = "Shade",
-		colors = genericColorTable,
+		label = "Custom Shade",
+		colors = paletteShadeCalc(),
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -794,7 +1131,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteHardHue",
 		label = "Hard Hue",
-		colors = genericColorTable,
+		colors = paletteHueCalc(),
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -814,7 +1151,7 @@ local function reloadColors(windowBounds)
 	{
 		id = "paletteSoftHue",
 		label = "Soft Hue",
-		colors = genericColorTable,
+		colors = paletteSoftHueCalc(),
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -838,10 +1175,10 @@ local function reloadColors(windowBounds)
 		id = "buttonReset",
 		text = "Reset",
 		onclick = function()
-			CL = ColorLeft
+			CL = colorLeft
 			CM = app.fgColor
-			CR = ColorRight
-			CC = ColorClipboard
+			CR = colorRight
+			CC = colorClipboard
 			AOC = amountOfColorsVar
 			AOH = amountOfHuesVar
 			HS = hueStrength
