@@ -9,9 +9,9 @@ local maxColors = 32
 
 -- STANDARD VALUES
 
-local colorLeft = Color{ r = 0, g = 0, b = 20, a = 255 }
+local colorLeft = Color{ r = 15, g = 15, b = 30, a = 255 }
 local colorMain = app.fgColor
-local colorRight = Color{ r = 240, g = 240, b = 220, a = 255 }
+local colorRight = Color{ r = 245, g = 245, b = 230, a = 255 }
 local colorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
 local amountOfColorsVar = 15
 local amountOfHuesVar = 12
@@ -1230,6 +1230,21 @@ local function reloadColors(windowBounds)
 		id = "buttonShadePalette",
 		text = "Generate whole Palette",
 		onclick = function()
+			for y = 1, AOH do
+				for i = 1, AOC do
+					copyColor = paletteShade[i]
+					app.command.AddColor
+						{
+							color = copyColor
+						}
+				end
+				local wrap = 0
+				if y + 1 > AOH then
+					wrap = AOH
+				end
+				CM = paletteHue[y+1-wrap]
+				paletteShadeCalc()
+			end
 		end
 	}
 -- SHADE END
@@ -1265,6 +1280,21 @@ local function reloadColors(windowBounds)
 		id = "buttonLightPalette",
 		text = "Generate whole Palette",
 		onclick = function()
+			for y = 1, AOH do
+				for i = 1, AOC do
+					copyColor = paletteLight[i]
+					app.command.AddColor
+						{
+							color = copyColor
+						}
+				end
+				local wrap = 0
+				if y + 1 > AOH then
+					wrap = AOH
+				end
+				CM = paletteHue[y+1-wrap]
+				paletteLightCalc()
+			end
 		end
 	}
 -- LIGHT END
@@ -1300,6 +1330,21 @@ local function reloadColors(windowBounds)
 		id = "buttonValuePalette",
 		text = "Generate whole Palette",
 		onclick = function()
+			for y = 1, AOH do
+				for i = 1, AOC do
+					copyColor = paletteValue[i]
+					app.command.AddColor
+						{
+							color = copyColor
+						}
+				end
+				local wrap = 0
+				if y + 1 > AOH then
+					wrap = AOH
+				end
+				CM = paletteHue[y+1-wrap]
+				paletteValueCalc()
+			end
 		end
 	}
 -- VALUE END
@@ -1335,9 +1380,74 @@ local function reloadColors(windowBounds)
 		id = "buttonSaturationPalette",
 		text = "Generate whole Palette",
 		onclick = function()
+			for y = 1, AOH do
+				for i = 1, AOC do
+					copyColor = paletteSaturation[i]
+					app.command.AddColor
+						{
+							color = copyColor
+						}
+				end
+				local wrap = 0
+				if y + 1 > AOH then
+					wrap = AOH
+				end
+				CM = paletteHue[y+1-wrap]
+				paletteSaturationCalc()
+			end
 		end
 	}
 -- SATURATION END
+-- SOFT HUE
+	:shades
+	{
+		id = "paletteSoftHue",
+		label = "Soft Hue",
+		colors = paletteSoftHueCalc(),
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonSoftHueLine",
+		text = "Copy Line to Palette",
+		onclick = function()
+			copyColor = Color{}
+			for i = 1, AOSH do
+				copyColor = paletteSoftHue[i]
+				app.command.AddColor
+					{
+						color = copyColor
+					}
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonSoftHuePalette",
+		text = "Generate whole Palette",
+		onclick = function()
+			for y = 1, AOH do
+				for i = 1, AOSH do
+					copyColor = paletteSoftHue[i]
+					app.command.AddColor
+						{
+							color = copyColor
+						}
+				end
+				local wrap = 0
+				if y + 1 > AOH then
+					wrap = AOH
+				end
+				CM = paletteHue[y+1-wrap]
+				paletteSoftHueCalc()
+			end
+		end
+	}
+-- SOFT HUE END
 -- HARD HUE
 	:shades
 	{
@@ -1366,34 +1476,6 @@ local function reloadColors(windowBounds)
 		end
 	}
 -- HARD HUE END
--- SOFT HUE
-	:shades
-	{
-		id = "paletteSoftHue",
-		label = "Soft Hue",
-		colors = paletteSoftHueCalc(),
-		onclick = function(ev)
-			if (ev.button == MouseButton.LEFT) then
-				app.fgColor = ev.color
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonSoftHueLine",
-		text = "Copy Line to Palette",
-		onclick = function()
-			copyColor = Color{}
-			for i = 1, AOSH do
-				copyColor = paletteSoftHue[i]
-				app.command.AddColor
-					{
-						color = copyColor
-					}
-			end
-		end
-	}
--- SOFT HUE END
 	:separator
 	{
 		id = "separator",
