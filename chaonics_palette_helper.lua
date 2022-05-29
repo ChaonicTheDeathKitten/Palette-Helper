@@ -474,7 +474,7 @@ local function paletteShadeCalc()
 		elseif AI == "Circ" then
 			tempColor.alpha = inCirc(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "outSine" then
-			tempColor.alpha = outAIne(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = outSine(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "outQuad" then
 			tempColor.alpha = outQuad(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "outCubic" then
@@ -1970,7 +1970,7 @@ local function reloadColors(windowBounds)
 		id = "buttonCancel",
 		text = "Cancel",
 		onclick = function()
-			generateCalcTable()
+			dlg:close()
 		end
 	}
 	:show
