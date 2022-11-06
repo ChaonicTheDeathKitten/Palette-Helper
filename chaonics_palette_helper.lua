@@ -8,69 +8,69 @@ local maxColors = 32
 
 -- YOUR CUSTOM PRESETS - IF YOU WANT TO GIVE THOSE A TRY!!!
 
--- PRESET 9
-local preset9name =						"Custom 1"
-local preset9colorLeft =				Color{ r = 0, g = 0, b = 0, a = 255 }
-local preset9colorRight =				Color{ r = 255, g = 255, b = 255, a = 255 }
-local preset9amountOfColorsVar =		15
-local preset9amountOfHuesVar =			12
-local preset9amountOfSoftHuesVar =		6
-local preset9hueStrength =				100
-local preset9satStrength =				100
-local preset9valStrenght =				100
-local preset9alpaStrength =				100
-local preset9hueInterpolationVar =		"Standard"
-local preset9satInterpolationVar =		"Quad"
-local preset9valInterpolationVar =		"Standard"
-local preset9alphaInterpolationVar =	"Quad"
+-- PRESET CUSTOM 1
+local presetcustom1name =						"Custom 1"
+local presetcustom1colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
+local presetcustom1colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
+local presetcustom1amountOfColorsVar =			15
+local presetcustom1amountOfHuesVar =			12
+local presetcustom1amountOfSoftHuesVar =		6
+local presetcustom1hueStrength =				100
+local presetcustom1satStrength =				100
+local presetcustom1valStrenght =				100
+local presetcustom1alpaStrength =				100
+local presetcustom1hueInterpolationVar =		"Standard"
+local presetcustom1satInterpolationVar =		"Quad"
+local presetcustom1valInterpolationVar =		"Standard"
+local presetcustom1alphaInterpolationVar =		"Quad"
 
--- PRESET 10
-local preset10name =					"Custom 2"
-local preset10colorLeft =				Color{ r = 0, g = 0, b = 0, a = 255 }
-local preset10colorRight =				Color{ r = 255, g = 255, b = 255, a = 255 }
-local preset10amountOfColorsVar =		15
-local preset10amountOfHuesVar =			12
-local preset10amountOfSoftHuesVar =		6
-local preset10hueStrength =				100
-local preset10satStrength =				100
-local preset10valStrenght =				100
-local preset10alpaStrength =			100
-local preset10hueInterpolationVar =		"Standard"
-local preset10satInterpolationVar =		"Quad"
-local preset10valInterpolationVar =		"Standard"
-local preset10alphaInterpolationVar =	"Quad"
+-- PRESET CUSTOM 2
+local presetcustom2name =						"Custom 2"
+local presetcustom2colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
+local presetcustom2colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
+local presetcustom2amountOfColorsVar =			15
+local presetcustom2amountOfHuesVar =			12
+local presetcustom2amountOfSoftHuesVar =		6
+local presetcustom2hueStrength =				100
+local presetcustom2satStrength =				100
+local presetcustom2valStrenght =				100
+local presetcustom2alpaStrength =				100
+local presetcustom2hueInterpolationVar =		"Standard"
+local presetcustom2satInterpolationVar =		"Quad"
+local presetcustom2valInterpolationVar =		"Standard"
+local presetcustom2alphaInterpolationVar =		"Quad"
 
--- PRESET 11
-local preset11name =					"Custom 3"
-local preset11colorLeft =				Color{ r = 0, g = 0, b = 0, a = 255 }
-local preset11colorRight =				Color{ r = 255, g = 255, b = 255, a = 255 }
-local preset11amountOfColorsVar =		15
-local preset11amountOfHuesVar =			12
-local preset11amountOfSoftHuesVar =		6
-local preset11hueStrength =				100
-local preset11satStrength =				100
-local preset11valStrenght =				100
-local preset11alpaStrength =			100
-local preset11hueInterpolationVar =		"Standard"
-local preset11satInterpolationVar =		"Quad"
-local preset11valInterpolationVar =		"Standard"
-local preset11alphaInterpolationVar =	"Quad"
+-- PRESET CUSTOM 3
+local presetcustom3name =						"Custom 3"
+local presetcustom3colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
+local presetcustom3colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
+local presetcustom3amountOfColorsVar =			15
+local presetcustom3amountOfHuesVar =			12
+local presetcustom3amountOfSoftHuesVar =		6
+local presetcustom3hueStrength =				100
+local presetcustom3satStrength =				100
+local presetcustom3valStrenght =				100
+local presetcustom3alpaStrength =				100
+local presetcustom3hueInterpolationVar =		"Standard"
+local presetcustom3satInterpolationVar =		"Quad"
+local presetcustom3valInterpolationVar =		"Standard"
+local presetcustom3alphaInterpolationVar =		"Quad"
 
--- PRESET 12
-local preset12name =					"Custom 4"
-local preset12colorLeft =				Color{ r = 0, g = 0, b = 0, a = 255 }
-local preset12colorRight =				Color{ r = 255, g = 255, b = 255, a = 255 }
-local preset12amountOfColorsVar =		15
-local preset12amountOfHuesVar =			12
-local preset12amountOfSoftHuesVar =		6
-local preset12hueStrength =				100
-local preset12satStrength =				100
-local preset12valStrenght =				100
-local preset12alpaStrength =			100
-local preset12hueInterpolationVar =		"Standard"
-local preset12satInterpolationVar =		"Quad"
-local preset12valInterpolationVar =		"Standard"
-local preset12alphaInterpolationVar =	"Quad"
+-- PRESET CUSTOM 4
+local presetcustom4name =						"Custom 4"
+local presetcustom4colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
+local presetcustom4colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
+local presetcustom4amountOfColorsVar =			15
+local presetcustom4amountOfHuesVar =			12
+local presetcustom4amountOfSoftHuesVar =		6
+local presetcustom4hueStrength =				100
+local presetcustom4satStrength =				100
+local presetcustom4valStrenght =				100
+local presetcustom4alpaStrength =				100
+local presetcustom4hueInterpolationVar =		"Standard"
+local presetcustom4satInterpolationVar =		"Quad"
+local presetcustom4valInterpolationVar =		"Standard"
+local presetcustom4alphaInterpolationVar =		"Quad"
 
 -- STOP MAKING CHANGES HERE (UNLESS YOU KNOW WHAT YOU ARE DOING)
 
@@ -94,118 +94,14 @@ local alphaInterpolationVar = "Quad"
 local calcTable = {}
 local genericColorTable = {}
 
--- PRESETS
-
--- PRESET 1 - DEFAULT VALUES
-local preset1name = "Default"
-
--- PRESET 2 - BETA COLORS
-local preset2name = "Beta"
-local preset2colorLeft = Color{ r = 20, g = 20, b = 51, a = 255 }
-local preset2colorRight = Color{ r = 230, g = 230, b = 195, a = 255 }
-local preset2amountOfColorsVar = 15
-local preset2amountOfHuesVar = 12
-local preset2amountOfSoftHuesVar = 6
--- I HAD TO MAKE SPACE.. TOO MANY VARIABLES. SOME VALUES ARE DIRECTLY IN THE BUTTONS
-local preset2hueInterpolationVar = "Standard"
-local preset2satInterpolationVar = "Quad"
-local preset2valInterpolationVar = "Standard"
-local preset2alphaInterpolationVar = "Quad"
-
--- PRESET 3
-local preset3name = "Preset 3"
-local preset3colorLeft = Color{ r = 26, g = 34, b = 51, a = 255 }
-local preset3colorRight = Color{ r = 242, g = 218, b = 170, a = 255 }
-local preset3amountOfColorsVar = 15
-local preset3amountOfHuesVar = 12
-local preset3amountOfSoftHuesVar = 6
--- I HAD TO MAKE SPACE.. TOO MANY VARIABLES. SOME VALUES ARE DIRECTLY IN THE BUTTONS
-local preset3hueInterpolationVar = "Standard"
-local preset3satInterpolationVar = "Circ"
-local preset3valInterpolationVar = "Standard"
-local preset3alphaInterpolationVar = "Quad"
-
--- PRESET 4
-local preset4name = "Preset 4"
-local preset4colorLeft = Color{ r = 43, g = 22, b = 64, a = 255 }
-local preset4colorRight = Color{ r = 228, g = 242, b = 157, a = 255 }
-local preset4amountOfColorsVar = 15
-local preset4amountOfHuesVar = 12
-local preset4amountOfSoftHuesVar = 6
--- I HAD TO MAKE SPACE.. TOO MANY VARIABLES. SOME VALUES ARE DIRECTLY IN THE BUTTONS
-local preset4hueInterpolationVar = "Standard"
-local preset4satInterpolationVar = "Quad"
-local preset4valInterpolationVar = "Standard"
-local preset4alphaInterpolationVar = "Quad"
-
--- PRESET 5
-local preset5name = "Preset 5"
-local preset5colorLeft = Color{ r = 0, g = 25, b = 38, a = 255 }
-local preset5colorRight = Color{ r = 235, g = 235, b = 164, a = 255 }
-local preset5amountOfColorsVar = 15
-local preset5amountOfHuesVar = 12
-local preset5amountOfSoftHuesVar = 6
-local preset5hueStrength = 100
-local preset5satStrength = 100
-local preset5valStrenght = 100
-local preset5alpaStrength = 100
-local preset5hueInterpolationVar = "Standard"
-local preset5satInterpolationVar = "Quad"
-local preset5valInterpolationVar = "Standard"
-local preset5alphaInterpolationVar = "Quad"
-
--- PRESET 6
-local preset6name = "Preset 6"
-local preset6colorLeft = Color{ r = 0, g = 21, b = 64, a = 255 }
-local preset6colorRight = Color{ r = 255, g = 255, b = 191, a = 255 }
-local preset6amountOfColorsVar = 15
-local preset6amountOfHuesVar = 12
-local preset6amountOfSoftHuesVar = 6
-local preset6hueStrength = 100
-local preset6satStrength = 100
-local preset6valStrenght = 100
-local preset6alpaStrength = 100
-local preset6hueInterpolationVar = "Standard"
-local preset6satInterpolationVar = "Quad"
-local preset6valInterpolationVar = "Standard"
-local preset6alphaInterpolationVar = "Quad"
-
--- PRESET 7
-local preset7name = "Preset 7"
-local preset7colorLeft = Color{ r = 0, g = 26, b = 51, a = 255 }
-local preset7colorRight = Color{ r = 255, g = 247, b = 204, a = 255 }
-local preset7amountOfColorsVar = 15
-local preset7amountOfHuesVar = 12
-local preset7amountOfSoftHuesVar = 6
-local preset7hueStrength = 100
-local preset7satStrength = 100
-local preset7valStrenght = 100
-local preset7alpaStrength = 100
-local preset7hueInterpolationVar = "Standard"
-local preset7satInterpolationVar = "Quad"
-local preset7valInterpolationVar = "Standard"
-local preset7alphaInterpolationVar = "Quad"
-
--- PRESET 8
-local preset8name = "Preset 8"
-local preset8colorLeft = Color{ r = 34, g = 0, b = 51, a = 255 }
-local preset8colorRight = Color{ r = 247, g = 255, b = 204, a = 255 }
-local preset8amountOfColorsVar = 15
-local preset8amountOfHuesVar = 12
-local preset8amountOfSoftHuesVar = 6
-local preset8hueStrength = 80
-local preset8satStrength = 100
-local preset8valStrenght = 100
-local preset8alpaStrength = 100
-local preset8hueInterpolationVar = "Standard"
-local preset8satInterpolationVar = "Quad"
-local preset8valInterpolationVar = "Standard"
-local preset8alphaInterpolationVar = "Quad"
-
 -- CHANGED VALUES
 
 local CL = colorLeft
-local CM = colorMain
+local CM = Color{}
+CM.red = colorMain.red
+CM.green = colorMain.green
+CM.blue = colorMain.blue
+CM.alpha = colorMain.alpha
 local CR = colorRight
 local CC = colorClipboard
 local AOC = amountOfColorsVar
@@ -1382,7 +1278,7 @@ local function reloadColors(windowBounds)
 	:button
 	{
 		id = "buttonPreset1",
-		text = preset1name,
+		text = "Default",
 		onclick = function()
 			CL = 	colorLeft
 			CR = 	colorRight
@@ -1404,21 +1300,21 @@ local function reloadColors(windowBounds)
 	:button
 	{
 		id = "buttonPreset2",
-		text = preset2name,
+		text = "Beta",
 		onclick = function()
-			CL = 	preset2colorLeft
-			CR = 	preset2colorRight
-			AOC = 	preset2amountOfColorsVar
-			AOH = 	preset2amountOfHuesVar
-			AOSH = 	preset2amountOfSoftHuesVar
+			CL = 	Color{ r = 20, g = 20, b = 51, a = 255 }
+			CR = 	Color{ r = 230, g = 230, b = 195, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
-			HI = 	preset2hueInterpolationVar
-			SI = 	preset2satInterpolationVar
-			VI = 	preset2valInterpolationVar
-			AI =	preset2alphaInterpolationVar
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
@@ -1426,21 +1322,21 @@ local function reloadColors(windowBounds)
 	:button
 	{
 		id = "buttonPreset3",
-		text = preset3name,
+		text = "Preset 3",
 		onclick = function()
-			CL = 	preset3colorLeft
-			CR = 	preset3colorRight
-			AOC = 	preset3amountOfColorsVar
-			AOH = 	preset3amountOfHuesVar
-			AOSH = 	preset3amountOfSoftHuesVar
+			CL = 	Color{ r = 26, g = 34, b = 51, a = 255 }
+			CR = 	Color{ r = 242, g = 218, b = 170, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
-			HI = 	preset3hueInterpolationVar
-			SI = 	preset3satInterpolationVar
-			VI = 	preset3valInterpolationVar
-			AI =	preset3alphaInterpolationVar
+			HI = 	"Standard"
+			SI = 	"Circ"
+			VI = 	"Standard"
+			AI =	"Quad"
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
@@ -1448,21 +1344,21 @@ local function reloadColors(windowBounds)
 	:button
 	{
 		id = "buttonPreset4",
-		text = preset4name,
+		text = "Preset 4",
 		onclick = function()
-			CL = 	preset4colorLeft
-			CR = 	preset4colorRight
-			AOC = 	preset4amountOfColorsVar
-			AOH = 	preset4amountOfHuesVar
-			AOSH = 	preset4amountOfSoftHuesVar
+			CL = 	Color{ r = 43, g = 22, b = 64, a = 255 }
+			CR = 	Color{ r = 228, g = 242, b = 157, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
-			HI = 	preset4hueInterpolationVar
-			SI = 	preset4satInterpolationVar
-			VI = 	preset4valInterpolationVar
-			AI =	preset4alphaInterpolationVar
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
@@ -1471,21 +1367,21 @@ local function reloadColors(windowBounds)
 	{
 		id = "buttonPreset5",
 		label = "",
-		text = preset5name,
+		text = "Preset 5",
 		onclick = function()
-			CL = 	preset5colorLeft
-			CR = 	preset5colorRight
-			AOC = 	preset5amountOfColorsVar
-			AOH = 	preset5amountOfHuesVar
-			AOSH = 	preset5amountOfSoftHuesVar
-			HS = 	preset5hueStrength
-			SS = 	preset5satStrength
-			VS = 	preset5valStrenght
-			AS = 	preset5alpaStrength
-			HI = 	preset5hueInterpolationVar
-			SI = 	preset5satInterpolationVar
-			VI = 	preset5valInterpolationVar
-			AI =	preset5alphaInterpolationVar
+			CL = 	Color{ r = 0, g = 25, b = 38, a = 255 }
+			CR = 	Color{ r = 235, g = 235, b = 164, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
@@ -1493,21 +1389,21 @@ local function reloadColors(windowBounds)
 	:button
 	{
 		id = "buttonPreset6",
-		text = preset6name,
+		text = "Preset 6",
 		onclick = function()
-			CL = 	preset6colorLeft
-			CR = 	preset6colorRight
-			AOC = 	preset6amountOfColorsVar
-			AOH = 	preset6amountOfHuesVar
-			AOSH = 	preset6amountOfSoftHuesVar
-			HS = 	preset6hueStrength
-			SS = 	preset6satStrength
-			VS = 	preset6valStrenght
-			AS = 	preset6alpaStrength
-			HI = 	preset6hueInterpolationVar
-			SI = 	preset6satInterpolationVar
-			VI = 	preset6valInterpolationVar
-			AI =	preset6alphaInterpolationVar
+			CL = 	Color{ r = 0, g = 21, b = 64, a = 255 }
+			CR = 	Color{ r = 255, g = 255, b = 191, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
@@ -1515,21 +1411,21 @@ local function reloadColors(windowBounds)
 	:button
 	{
 		id = "buttonPreset7",
-		text = preset7name,
+		text = "Preset 7",
 		onclick = function()
-			CL = 	preset7colorLeft
-			CR = 	preset7colorRight
-			AOC = 	preset7amountOfColorsVar
-			AOH = 	preset7amountOfHuesVar
-			AOSH = 	preset7amountOfSoftHuesVar
-			HS = 	preset7hueStrength
-			SS = 	preset7satStrength
-			VS = 	preset7valStrenght
-			AS = 	preset7alpaStrength
-			HI = 	preset7hueInterpolationVar
-			SI = 	preset7satInterpolationVar
-			VI = 	preset7valInterpolationVar
-			AI =	preset7alphaInterpolationVar
+			CL = 	Color{ r = 0, g = 26, b = 51, a = 255 }
+			CR = 	Color{ r = 255, g = 247, b = 204, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
@@ -1537,110 +1433,110 @@ local function reloadColors(windowBounds)
 	:button
 	{
 		id = "buttonPreset8",
-		text = preset8name,
+		text = "Preset 8",
 		onclick = function()
-			CL = 	preset8colorLeft
-			CR = 	preset8colorRight
-			AOC = 	preset8amountOfColorsVar
-			AOH = 	preset8amountOfHuesVar
-			AOSH = 	preset8amountOfSoftHuesVar
-			HS = 	preset8hueStrength
-			SS = 	preset8satStrength
-			VS = 	preset8valStrenght
-			AS = 	preset8alpaStrength
-			HI = 	preset8hueInterpolationVar
-			SI = 	preset8satInterpolationVar
-			VI = 	preset8valInterpolationVar
-			AI =	preset8alphaInterpolationVar
+			CL = 	Color{ r = 34, g = 0, b = 51, a = 255 }
+			CR = 	Color{ r = 247, g = 255, b = 204, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	80
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
 	}
 	:button
 	{
-		id = "buttonPreset9",
+		id = "buttonPresetCustom1",
 		label = "",
-		text = preset9name,
+		text = presetcustom1name,
 		onclick = function()
-			CL = 	preset9colorLeft
-			CR = 	preset9colorRight
-			AOC = 	preset9amountOfColorsVar
-			AOH = 	preset9amountOfHuesVar
-			AOSH = 	preset9amountOfSoftHuesVar
-			HS = 	preset9hueStrength
-			SS = 	preset9satStrength
-			VS = 	preset9valStrenght
-			AS = 	preset9alpaStrength
-			HI = 	preset9hueInterpolationVar
-			SI = 	preset9satInterpolationVar
-			VI = 	preset9valInterpolationVar
-			AI =	preset9alphaInterpolationVar
+			CL = 	presetcustom1colorLeft
+			CR = 	presetcustom1colorRight
+			AOC = 	presetcustom1amountOfColorsVar
+			AOH = 	presetcustom1amountOfHuesVar
+			AOSH = 	presetcustom1amountOfSoftHuesVar
+			HS = 	presetcustom1hueStrength
+			SS = 	presetcustom1satStrength
+			VS = 	presetcustom1valStrenght
+			AS = 	presetcustom1alpaStrength
+			HI = 	presetcustom1hueInterpolationVar
+			SI = 	presetcustom1satInterpolationVar
+			VI = 	presetcustom1valInterpolationVar
+			AI =	presetcustom1alphaInterpolationVar
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
 	}
 	:button
 	{
-		id = "buttonPreset10",
-		text = preset10name,
+		id = "buttonPresetCustom2",
+		text = presetcustom2name,
 		onclick = function()
-			CL = 	preset10colorLeft
-			CR = 	preset10colorRight
-			AOC = 	preset10amountOfColorsVar
-			AOH = 	preset10amountOfHuesVar
-			AOSH = 	preset10amountOfSoftHuesVar
-			HS = 	preset10hueStrength
-			SS = 	preset10satStrength
-			VS = 	preset10valStrenght
-			AS = 	preset10alpaStrength
-			HI = 	preset10hueInterpolationVar
-			SI = 	preset10satInterpolationVar
-			VI = 	preset10valInterpolationVar
-			AI =	preset10alphaInterpolationVar
+			CL = 	presetcustom2colorLeft
+			CR = 	presetcustom2colorRight
+			AOC = 	presetcustom2amountOfColorsVar
+			AOH = 	presetcustom2amountOfHuesVar
+			AOSH = 	presetcustom2amountOfSoftHuesVar
+			HS = 	presetcustom2hueStrength
+			SS = 	presetcustom2satStrength
+			VS = 	presetcustom2valStrenght
+			AS = 	presetcustom2alpaStrength
+			HI = 	presetcustom2hueInterpolationVar
+			SI = 	presetcustom2satInterpolationVar
+			VI = 	presetcustom2valInterpolationVar
+			AI =	presetcustom2alphaInterpolationVar
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
 	}
 	:button
 	{
-		id = "buttonPreset11",
-		text = preset11name,
+		id = "buttonPresetCustom3",
+		text = presetcustom3name,
 		onclick = function()
-			CL = 	preset11colorLeft
-			CR = 	preset11colorRight
-			AOC = 	preset11amountOfColorsVar
-			AOH = 	preset11amountOfHuesVar
-			AOSH = 	preset11amountOfSoftHuesVar
-			HS = 	preset11hueStrength
-			SS = 	preset11satStrength
-			VS = 	preset11valStrenght
-			AS = 	preset11alpaStrength
-			HI = 	preset11hueInterpolationVar
-			SI = 	preset11satInterpolationVar
-			VI = 	preset11valInterpolationVar
-			AI =	preset11alphaInterpolationVar
+			CL = 	presetcustom3colorLeft
+			CR = 	presetcustom3colorRight
+			AOC = 	presetcustom3amountOfColorsVar
+			AOH = 	presetcustom3amountOfHuesVar
+			AOSH = 	presetcustom3amountOfSoftHuesVar
+			HS = 	presetcustom3hueStrength
+			SS = 	presetcustom3satStrength
+			VS = 	presetcustom3valStrenght
+			AS = 	presetcustom3alpaStrength
+			HI = 	presetcustom3hueInterpolationVar
+			SI = 	presetcustom3satInterpolationVar
+			VI = 	presetcustom3valInterpolationVar
+			AI =	presetcustom3alphaInterpolationVar
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
 	}
 	:button
 	{
-		id = "buttonPreset12",
-		text = preset12name,
+		id = "buttonPresetCustom4",
+		text = presetcustom4name,
 		onclick = function()
-			CL = 	preset12colorLeft
-			CR = 	preset12colorRight
-			AOC = 	preset12amountOfColorsVar
-			AOH = 	preset12amountOfHuesVar
-			AOSH = 	preset12amountOfSoftHuesVar
-			HS = 	preset12hueStrength
-			SS = 	preset12satStrength
-			VS = 	preset12valStrenght
-			AS = 	preset12alpaStrength
-			HI = 	preset12hueInterpolationVar
-			SI = 	preset12satInterpolationVar
-			VI = 	preset12valInterpolationVar
-			AI =	preset12alphaInterpolationVar
+			CL = 	presetcustom4colorLeft
+			CR = 	presetcustom4colorRight
+			AOC = 	presetcustom4amountOfColorsVar
+			AOH = 	presetcustom4amountOfHuesVar
+			AOSH = 	presetcustom4amountOfSoftHuesVar
+			HS = 	presetcustom4hueStrength
+			SS = 	presetcustom4satStrength
+			VS = 	presetcustom4valStrenght
+			AS = 	presetcustom4alpaStrength
+			HI = 	presetcustom4hueInterpolationVar
+			SI = 	presetcustom4satInterpolationVar
+			VI = 	presetcustom4valInterpolationVar
+			AI =	presetcustom4alphaInterpolationVar
 			reloadColors(dlg.bounds)
 			dlg:close()
 		end
