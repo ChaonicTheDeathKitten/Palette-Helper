@@ -85,6 +85,18 @@ local presetcustom4alphaInterpolationVar =		"Quad"
 
 dofile( "table.save-1.0.lua" )
 
+-- ADVANCED SETTINGS VARIABLES
+
+local includeLeft = "Include Left Color"
+local includeRight = "Include Right Color"
+local copyColor = "*Copy Color*"
+local saveColor = "Save Color"
+local saveLine = "Save Line"
+local savePalette = "Generate Palette"
+local saveSettings = "Save as"
+local interpolateSoftHue = "No"
+local interpolateHardHue = "No"
+
 -- STANDARD VALUES
 
 local colorLeft = Color{ r = 15, g = 15, b = 30, a = 255 }
@@ -100,7 +112,7 @@ local valStrenght = 100
 local alpaStrength = 100
 local hueInterpolationVar = "Standard"
 local satInterpolationVar = "Quad"
-local valInterpolationVar = "Standard"
+local valInterpolationVar = "Sine"
 local alphaInterpolationVar = "Quad"
 local calcTable = {}
 local genericColorTable = {}
@@ -807,7 +819,7 @@ local function paletteHueCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (tempColor.hue)
-		if HI == "Standard" then
+		if HI == "Standard" or interpolateHardHue == "No" then
 			tempColor.hue = linear((1/AOH)*(i-1), CM.hue, 360, 1)
 			while tempColor.hue >= 360 do
 				tempColor.hue = tempColor.hue - 360
@@ -875,7 +887,7 @@ local function paletteSoftHueCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (tempColor.hue)
-		if HI == "Standard" then
+		if HI == "Standard" or interpolateSoftHue == "No" then
 			tempColor.hue = linear((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
 			while tempColor.hue >= 360 do
 				tempColor.hue = tempColor.hue - 360
@@ -1148,6 +1160,48 @@ local function advancedSettings(windowBounds)
 			dlg:close()
 		end
 	}
+	:label
+	{
+		id = includeSoftHue,
+		label = "Include:",
+		text= "Soft Hue Interpolation"
+	}
+	:label
+	{
+		id = includeHardHue,
+		text= "Hard Hue Interpolation"
+	}
+	:button
+	{
+		id = "buttonInterpolateSoftHue",
+		label = "",
+		text = interpolateSoftHue,
+		onclick = function()
+			if interpolateSoftHue == "No" then
+				interpolateSoftHue = "Yes"
+			else
+				interpolateSoftHue = "No"
+			end
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonInterpolateHardHue",
+		text = interpolateHardHue,
+		onclick = function()
+			if interpolateHardHue == "No" then
+				interpolateHardHue = "Yes"
+			else
+				interpolateHardHue = "No"
+			end
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
 -- COLOR CONTROL END
 -- PRESET CONTROL
 	:separator
@@ -1340,6 +1394,31 @@ local function advancedSettings(windowBounds)
 			dlg:close()
 		end
 	}
+	:separator
+	{
+		id = "separator",
+		text = "Custom Presets",
+	}
+	:button
+	{
+		id = "buttonSave",
+		text = saveSettings,
+		onclick = function()
+			if saveSettings == "Save as" then
+				saveSettings = "*Save as*"
+			else
+				saveSettings = "Save as"
+			end
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:entry
+	{
+		id = "entrySaveAs",
+		text = "",
+	}
 	:button
 	{
 		id = "buttonPresetCustom1",
@@ -1432,6 +1511,11 @@ local function advancedSettings(windowBounds)
 			reloadColorWindow()
 			dlg:close()
 		end
+	}
+:separator
+	{
+		id = "separator",
+		text = "",
 	}
 -- PRESET CONTROL END
 	:button
@@ -1614,57 +1698,162 @@ local function reloadColors(windowBounds)
 			advancedSettings()
 		end
 	}
+-- SHADE
 	:separator
 	{
 		id = "separator",
 		text = "Shades"
 	}
--- SHADE
+	:button
+	{
+		id = "buttonIncludeLeft",
+		text = includeLeft,
+		onclick = function()
+			if includeLeft == "Include Left Color" then
+				includeLeft = "*Includes Left Color*"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			else
+				includeLeft = "Include Left Color"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonIncludeRight",
+		text = includeRight,
+		onclick = function()
+			if includeRight == "Include Right Color" then
+				includeRight = "*Includes Right Color*"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			else
+				includeRight = "Include Right Color"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonCopyColor",
+		label = "",
+		text = copyColor,
+		onclick = function()
+			if copyColor == "Copy Color" then
+				copyColor = "*Copy Color*"
+				saveColor = "Save Color"
+				saveLine = "Save Line"
+				savePalette = "Generate Palette"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			else
+				copyColor = "Copy Color"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonSaveColor",
+		text = saveColor,
+		onclick = function()
+			if saveColor == "Save Color" then
+				copyColor = "Copy Color"
+				saveColor = "*Save Color*"
+				saveLine = "Save Line"
+				savePalette = "Generate Palette"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			else
+				saveColor = "Save Color"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonSaveLine",
+		text = saveLine,
+		onclick = function()
+			if saveLine == "Save Line" then
+				copyColor = "Copy Color"
+				saveColor = "Save Color"
+				saveLine = "*Save Line*"
+				savePalette = "Generate Palette"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			else
+				saveLine = "Save Line"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonGeneratePalette",
+		text = savePalette,
+		onclick = function()
+			if savePalette == "Generate Palette" then
+				copyColor = "Copy Color"
+				saveColor = "Save Color"
+				saveLine = "Save Line"
+				savePalette = "*Generate Palette*"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			else
+				savePalette = "Generate Palette"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			end
+		end
+	}
 	:shades
 	{
 		id = "paletteShade",
 		label = "Custom Shade",
 		colors = paletteShadeCalc(),
-		onclick = function(ev)
-			if (ev.button == MouseButton.LEFT) then
+		onclick =
+		function(ev)
+			local saveToPalette = Color{}
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
 				app.fgColor = ev.color
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonShadeLine",
-		text = "Copy Line to Palette",
-		onclick = function()
-			copyColor = Color{}
-			for i = 1, AOC do
-				copyColor = paletteShade[i]
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
 				app.command.AddColor
 					{
-						color = copyColor
+						color = ev.color
 					}
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonShadePalette",
-		text = "Generate whole Palette",
-		onclick = function()
-			for y = 1, AOH do
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
 				for i = 1, AOC do
-					copyColor = paletteShade[i]
+					local saveToPalette = paletteShade[i]
 					app.command.AddColor
 						{
-							color = copyColor
+							color = saveToPalette
 						}
+			end
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Generate Palette*" then
+				for y = 1, AOH do
+					for i = 1, AOC do
+						local saveToPalette = paletteShade[i]
+						app.command.AddColor
+							{
+								color = saveToPalette
+							}
+					end
+					local wrap = 0
+					if y + 1 > AOH then
+						wrap = AOH
+					end
+					CM = paletteHue[y+1-wrap]
+					paletteShadeCalc()
 				end
-				local wrap = 0
-				if y + 1 > AOH then
-					wrap = AOH
-				end
-				CM = paletteHue[y+1-wrap]
-				paletteShadeCalc()
 			end
 		end
 	}
@@ -1675,46 +1864,42 @@ local function reloadColors(windowBounds)
 		id = "paletteLight",
 		label = "Light",
 		colors = paletteLightCalc(),
-		onclick = function(ev)
-			if (ev.button == MouseButton.LEFT) then
+		onclick =
+		function(ev)
+			local saveToPalette = Color{}
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
 				app.fgColor = ev.color
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonLightLine",
-		text = "Copy Line to Palette",
-		onclick = function()
-			copyColor = Color{}
-			for i = 1, AOC do
-				copyColor = paletteLight[i]
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
 				app.command.AddColor
 					{
-						color = copyColor
+						color = ev.color
 					}
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonLightPalette",
-		text = "Generate whole Palette",
-		onclick = function()
-			for y = 1, AOH do
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
 				for i = 1, AOC do
-					copyColor = paletteLight[i]
+					local saveToPalette = paletteLight[i]
 					app.command.AddColor
 						{
-							color = copyColor
+							color = saveToPalette
 						}
+			end
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Generate Palette*" then
+				for y = 1, AOH do
+					for i = 1, AOC do
+						local saveToPalette = paletteLight[i]
+						app.command.AddColor
+							{
+								color = saveToPalette
+							}
+					end
+					local wrap = 0
+					if y + 1 > AOH then
+						wrap = AOH
+					end
+					CM = paletteHue[y+1-wrap]
+					paletteLightCalc()
 				end
-				local wrap = 0
-				if y + 1 > AOH then
-					wrap = AOH
-				end
-				CM = paletteHue[y+1-wrap]
-				paletteLightCalc()
 			end
 		end
 	}
@@ -1725,46 +1910,42 @@ local function reloadColors(windowBounds)
 		id = "paletteValue",
 		label = "Value",
 		colors = paletteValueCalc(),
-		onclick = function(ev)
-			if (ev.button == MouseButton.LEFT) then
+		onclick =
+		function(ev)
+			local saveToPalette = Color{}
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
 				app.fgColor = ev.color
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonValueLine",
-		text = "Copy Line to Palette",
-		onclick = function()
-			copyColor = Color{}
-			for i = 1, AOC do
-				copyColor = paletteValue[i]
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
 				app.command.AddColor
 					{
-						color = copyColor
+						color = ev.color
 					}
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonValuePalette",
-		text = "Generate whole Palette",
-		onclick = function()
-			for y = 1, AOH do
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
 				for i = 1, AOC do
-					copyColor = paletteValue[i]
+					local saveToPalette = paletteValue[i]
 					app.command.AddColor
 						{
-							color = copyColor
+							color = saveToPalette
 						}
+			end
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Generate Palette*" then
+				for y = 1, AOH do
+					for i = 1, AOC do
+						local saveToPalette = paletteValue[i]
+						app.command.AddColor
+							{
+								color = saveToPalette
+							}
+					end
+					local wrap = 0
+					if y + 1 > AOH then
+						wrap = AOH
+					end
+					CM = paletteHue[y+1-wrap]
+					paletteValueCalc()
 				end
-				local wrap = 0
-				if y + 1 > AOH then
-					wrap = AOH
-				end
-				CM = paletteHue[y+1-wrap]
-				paletteValueCalc()
 			end
 		end
 	}
@@ -1775,46 +1956,42 @@ local function reloadColors(windowBounds)
 		id = "paletteSaturation",
 		label = "Saturation",
 		colors = paletteSaturationCalc(),
-		onclick = function(ev)
-			if (ev.button == MouseButton.LEFT) then
+		onclick =
+		function(ev)
+			local saveToPalette = Color{}
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
 				app.fgColor = ev.color
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonSaturationLine",
-		text = "Copy Line to Palette",
-		onclick = function()
-			copyColor = Color{}
-			for i = 1, AOC do
-				copyColor = paletteSaturation[i]
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
 				app.command.AddColor
 					{
-						color = copyColor
+						color = ev.color
 					}
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonSaturationPalette",
-		text = "Generate whole Palette",
-		onclick = function()
-			for y = 1, AOH do
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
 				for i = 1, AOC do
-					copyColor = paletteSaturation[i]
+					local saveToPalette = paletteSaturation[i]
 					app.command.AddColor
 						{
-							color = copyColor
+							color = saveToPalette
 						}
+			end
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Generate Palette*" then
+				for y = 1, AOH do
+					for i = 1, AOC do
+						local saveToPalette = paletteSaturation[i]
+						app.command.AddColor
+							{
+								color = saveToPalette
+							}
+					end
+					local wrap = 0
+					if y + 1 > AOH then
+						wrap = AOH
+					end
+					CM = paletteHue[y+1-wrap]
+					paletteSaturationCalc()
 				end
-				local wrap = 0
-				if y + 1 > AOH then
-					wrap = AOH
-				end
-				CM = paletteHue[y+1-wrap]
-				paletteSaturationCalc()
 			end
 		end
 	}
@@ -1825,46 +2002,40 @@ local function reloadColors(windowBounds)
 		id = "paletteSoftHue",
 		label = "Soft Hue",
 		colors = paletteSoftHueCalc(),
-		onclick = function(ev)
-			if (ev.button == MouseButton.LEFT) then
+		onclick =
+		function(ev)
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
 				app.fgColor = ev.color
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonSoftHueLine",
-		text = "Copy Line to Palette",
-		onclick = function()
-			copyColor = Color{}
-			for i = 1, AOSH do
-				copyColor = paletteSoftHue[i]
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
 				app.command.AddColor
 					{
-						color = copyColor
+						color = ev.color
 					}
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonSoftHuePalette",
-		text = "Generate whole Palette",
-		onclick = function()
-			for y = 1, AOH do
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
 				for i = 1, AOSH do
-					copyColor = paletteSoftHue[i]
-					app.command.AddColor
-						{
-							color = copyColor
-						}
+				app.command.AddColor
+					{
+						color = paletteSoftHue[i]
+					}
 				end
-				local wrap = 0
-				if y + 1 > AOH then
-					wrap = AOH
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Generate Palette*" then
+				for y = 1, AOH do
+					for i = 1, AOSH do
+						local saveToPalette = paletteSoftHue[i]
+						app.command.AddColor
+							{
+								color = saveToPalette
+							}
+					end
+					local wrap = 0
+					if y + 1 > AOH then
+						wrap = AOH
+					end
+					CM = paletteHue[y+1-wrap]
+					paletteSoftHueCalc()
 				end
-				CM = paletteHue[y+1-wrap]
-				paletteSoftHueCalc()
 			end
 		end
 	}
@@ -1875,24 +2046,35 @@ local function reloadColors(windowBounds)
 		id = "paletteHardHue",
 		label = "Hard Hue",
 		colors = paletteHueCalc(),
-		onclick = function(ev)
-			if (ev.button == MouseButton.LEFT) then
+		onclick =
+		function(ev)
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
 				app.fgColor = ev.color
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonHardHueLine",
-		text = "Copy Line to Palette",
-		onclick = function()
-			copyColor = Color{}
-			for i = 1, AOH do
-				copyColor = paletteHue[i]
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
 				app.command.AddColor
 					{
-						color = copyColor
+						color = ev.color
 					}
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
+				local saveToPalette = Color{}
+				for i = 1, AOH do
+					saveToPalette = paletteHue[i]
+					app.command.AddColor
+						{
+							color = saveToPalette
+						}
+				end
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Generate Palette*" then
+				local saveToPalette = Color{}
+				for i = 1, AOH do
+					saveToPalette = paletteHue[i]
+					app.command.AddColor
+						{
+							color = saveToPalette
+						}
+				end
 			end
 		end
 	}
@@ -1907,7 +2089,6 @@ local function reloadColors(windowBounds)
 		text = "Reset",
 		onclick = function()
 			CL = colorLeft
-			CM = app.fgColor
 			CR = colorRight
 			CC = colorClipboard
 			AOC = amountOfColorsVar
@@ -1920,7 +2101,7 @@ local function reloadColors(windowBounds)
 			SI = satInterpolationVar
 			VI = valInterpolationVar
 			AI = alphaInterpolationVar
-			reloadColors(dlg.bounds)
+			reloadColors()
 			dlg:close()
 		end
 	}
