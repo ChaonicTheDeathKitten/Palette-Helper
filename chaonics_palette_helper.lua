@@ -9,6 +9,7 @@ local maxColors = 32
 -- YOUR CUSTOM PRESETS - IF YOU WANT TO GIVE THOSE A TRY!!!
 
 -- PRESET CUSTOM 1
+
 local presetcustom1name =						"Custom 1"
 local presetcustom1colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
 local presetcustom1colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
@@ -25,6 +26,7 @@ local presetcustom1valInterpolationVar =		"Standard"
 local presetcustom1alphaInterpolationVar =		"Quad"
 
 -- PRESET CUSTOM 2
+
 local presetcustom2name =						"Custom 2"
 local presetcustom2colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
 local presetcustom2colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
@@ -41,6 +43,7 @@ local presetcustom2valInterpolationVar =		"Standard"
 local presetcustom2alphaInterpolationVar =		"Quad"
 
 -- PRESET CUSTOM 3
+
 local presetcustom3name =						"Custom 3"
 local presetcustom3colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
 local presetcustom3colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
@@ -57,6 +60,7 @@ local presetcustom3valInterpolationVar =		"Standard"
 local presetcustom3alphaInterpolationVar =		"Quad"
 
 -- PRESET CUSTOM 4
+
 local presetcustom4name =						"Custom 4"
 local presetcustom4colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
 local presetcustom4colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
@@ -73,6 +77,13 @@ local presetcustom4valInterpolationVar =		"Standard"
 local presetcustom4alphaInterpolationVar =		"Quad"
 
 -- STOP MAKING CHANGES HERE (UNLESS YOU KNOW WHAT YOU ARE DOING)
+
+-- WAIT FUNCTION
+
+
+-- DEPENDENCIES
+
+dofile( "table.save-1.0.lua" )
 
 -- STANDARD VALUES
 
@@ -695,6 +706,7 @@ local function paletteSaturationCalc()
 	local copyColorAmount = AOC
 	local secondRound = 0
 	local hasCenter = false
+	reloadColorsNow = false
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -923,6 +935,522 @@ end
 
 -- RELOAD COLORS
 
+local function advancedSettings(windowBounds)
+	local dlg
+	dlg = Dialog
+	{ 
+		title = "Chaonic's Advanced Settings"
+	}
+	dlg
+	:separator
+	{
+		id = "separator",
+		text = "Advanced Color Control"
+	}
+	:label
+	{
+		id = labelStrengthHue,
+		label = "Strength of:",
+		text= "Hue/Color"
+	}
+	:label
+	{
+		id=labelStrengthSaturation,
+		text= "Saturation"
+	}
+	:slider
+	{
+		id = "hueStrengthSlider",
+		min=0,
+		max=100,
+		value=HS,
+		onchange=function()
+			HS = dlg.data.hueStrengthSlider
+		end,
+		onrelease=function()
+			HS = dlg.data.hueStrengthSlider
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+			end
+	}
+	:slider
+	{
+		id = "satStrengthSlider",
+		min=0,
+		max=100,
+		value=SS,
+		onchange=function()
+			SS = dlg.data.satStrengthSlider
+		end,
+		onrelease=function()
+			SS = dlg.data.satStrengthSlider
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+			end
+	}
+	:label
+	{
+		id=labelStrengthValueLight,
+		label = "",
+		text= "Value/Light"
+	}
+	:label
+	{
+		id=labelStrengthAlpha,
+		text= "Alpha"
+	}
+	:slider
+	{
+		id = "valStrengthSlider",
+		min=0,
+		max=100,
+		value=VS,
+		onchange=function()
+			VS = dlg.data.valStrengthSlider
+		end,
+		onrelease=function()
+			VS = dlg.data.valStrengthSlider
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+			end
+	}
+	:slider
+	{
+		id = "alphaStrengthSlider",
+		min=0,
+		max=100,
+		value=AS,
+		onchange=function()
+			AS = dlg.data.alphaStrengthSlider
+		end,
+		onrelease=function()
+			AS = dlg.data.alphaStrengthSlider
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+			end
+	}
+	:label
+	{
+		id = "huelabel",
+		label = "Interpolations: ",
+		text = "Hue/Color"
+	}
+	:label
+	{
+		id = "satlabel",
+		text = "Saturation"
+	}
+	:label
+	{
+		id = "vallabel",
+		text = "Value/Light"
+	}
+	:label
+	{
+		id = "alphalabel",
+		text= "Alpha"
+	}
+	:combobox
+	{
+		id = "hueInterpolation",
+		option = HI,
+		options =
+		{
+			"Standard",
+			"Sine",
+			"Quad",
+			"Cubic",
+			"Circ",
+			"outSine",
+			"outQuad",
+			"outCubic",
+			"outCirc"
+		},
+		onchange = function()
+			HI = dlg.data.hueInterpolation
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:combobox
+	{
+		id = "satInterpolation",
+		option = SI,
+		options =
+		{
+			"Standard",
+			"Linear",
+			"Sine",
+			"Quad",
+			"Cubic",
+			"Circ",
+			"outSine",
+			"outQuad",
+			"outCubic",
+			"outCirc"
+		},
+		onchange = function()
+			SI = dlg.data.satInterpolation
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:combobox
+	{
+		id = "valInterpolation",
+		option = VI,
+		options =
+		{
+			"Standard",
+			"Linear",
+			"Sine",
+			"Quad",
+			"Cubic",
+			"Circ",
+			"outSine",
+			"outQuad",
+			"outCubic",
+			"outCirc"
+		},
+		onchange = function()
+			VI = dlg.data.valInterpolation
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:combobox
+	{
+		id = "alphaInterpolation",
+		option = AI,
+		options =
+		{
+			"Linear",
+			"Sine",
+			"Quad",
+			"Cubic",
+			"Circ",
+			"outSine",
+			"outQuad",
+			"outCubic",
+			"outCirc"
+		},
+		onchange = function()
+			AI = dlg.data.alphaInterpolation
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+-- COLOR CONTROL END
+-- PRESET CONTROL
+	:separator
+	{
+		id = "separator",
+		text = "Presets",
+	}
+	:button
+	{
+		id = "buttonPreset1",
+		text = "Default",
+		onclick = function()
+			CL = 	colorLeft
+			CR = 	colorRight
+			AOC = 	amountOfColorsVar
+			AOH = 	amountOfHuesVar
+			AOSH = 	amountOfSoftHuesVar
+			HS = 	hueStrength
+			SS = 	satStrength
+			VS = 	valStrenght
+			AS = 	alpaStrength
+			HI = 	hueInterpolationVar
+			SI = 	satInterpolationVar
+			VI = 	valInterpolationVar
+			AI =	alphaInterpolationVar
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPreset2",
+		text = "Beta",
+		onclick = function()
+			CL = 	Color{ r = 20, g = 20, b = 51, a = 255 }
+			CR = 	Color{ r = 230, g = 230, b = 195, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPreset3",
+		text = "Preset 3",
+		onclick = function()
+			CL = 	Color{ r = 26, g = 34, b = 51, a = 255 }
+			CR = 	Color{ r = 242, g = 218, b = 170, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Circ"
+			VI = 	"Standard"
+			AI =	"Quad"
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPreset4",
+		text = "Preset 4",
+		onclick = function()
+			CL = 	Color{ r = 43, g = 22, b = 64, a = 255 }
+			CR = 	Color{ r = 228, g = 242, b = 157, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPreset5",
+		label = "",
+		text = "Preset 5",
+		onclick = function()
+			CL = 	Color{ r = 0, g = 25, b = 38, a = 255 }
+			CR = 	Color{ r = 235, g = 235, b = 164, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPreset6",
+		text = "Preset 6",
+		onclick = function()
+			CL = 	Color{ r = 0, g = 21, b = 64, a = 255 }
+			CR = 	Color{ r = 255, g = 255, b = 191, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPreset7",
+		text = "Preset 7",
+		onclick = function()
+			CL = 	Color{ r = 0, g = 26, b = 51, a = 255 }
+			CR = 	Color{ r = 255, g = 247, b = 204, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	100
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPreset8",
+		text = "Preset 8",
+		onclick = function()
+			CL = 	Color{ r = 34, g = 0, b = 51, a = 255 }
+			CR = 	Color{ r = 247, g = 255, b = 204, a = 255 }
+			AOC = 	15
+			AOH = 	12
+			AOSH = 	6
+			HS = 	80
+			SS = 	100
+			VS = 	100
+			AS = 	100
+			HI = 	"Standard"
+			SI = 	"Quad"
+			VI = 	"Standard"
+			AI =	"Quad"
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPresetCustom1",
+		label = "",
+		text = presetcustom1name,
+		onclick = function()
+			CL = 	presetcustom1colorLeft
+			CR = 	presetcustom1colorRight
+			AOC = 	presetcustom1amountOfColorsVar
+			AOH = 	presetcustom1amountOfHuesVar
+			AOSH = 	presetcustom1amountOfSoftHuesVar
+			HS = 	presetcustom1hueStrength
+			SS = 	presetcustom1satStrength
+			VS = 	presetcustom1valStrenght
+			AS = 	presetcustom1alpaStrength
+			HI = 	presetcustom1hueInterpolationVar
+			SI = 	presetcustom1satInterpolationVar
+			VI = 	presetcustom1valInterpolationVar
+			AI =	presetcustom1alphaInterpolationVar
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPresetCustom2",
+		text = presetcustom2name,
+		onclick = function()
+			CL = 	presetcustom2colorLeft
+			CR = 	presetcustom2colorRight
+			AOC = 	presetcustom2amountOfColorsVar
+			AOH = 	presetcustom2amountOfHuesVar
+			AOSH = 	presetcustom2amountOfSoftHuesVar
+			HS = 	presetcustom2hueStrength
+			SS = 	presetcustom2satStrength
+			VS = 	presetcustom2valStrenght
+			AS = 	presetcustom2alpaStrength
+			HI = 	presetcustom2hueInterpolationVar
+			SI = 	presetcustom2satInterpolationVar
+			VI = 	presetcustom2valInterpolationVar
+			AI =	presetcustom2alphaInterpolationVar
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPresetCustom3",
+		text = presetcustom3name,
+		onclick = function()
+			CL = 	presetcustom3colorLeft
+			CR = 	presetcustom3colorRight
+			AOC = 	presetcustom3amountOfColorsVar
+			AOH = 	presetcustom3amountOfHuesVar
+			AOSH = 	presetcustom3amountOfSoftHuesVar
+			HS = 	presetcustom3hueStrength
+			SS = 	presetcustom3satStrength
+			VS = 	presetcustom3valStrenght
+			AS = 	presetcustom3alpaStrength
+			HI = 	presetcustom3hueInterpolationVar
+			SI = 	presetcustom3satInterpolationVar
+			VI = 	presetcustom3valInterpolationVar
+			AI =	presetcustom3alphaInterpolationVar
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonPresetCustom4",
+		text = presetcustom4name,
+		onclick = function()
+			CL = 	presetcustom4colorLeft
+			CR = 	presetcustom4colorRight
+			AOC = 	presetcustom4amountOfColorsVar
+			AOH = 	presetcustom4amountOfHuesVar
+			AOSH = 	presetcustom4amountOfSoftHuesVar
+			HS = 	presetcustom4hueStrength
+			SS = 	presetcustom4satStrength
+			VS = 	presetcustom4valStrenght
+			AS = 	presetcustom4alpaStrength
+			HI = 	presetcustom4hueInterpolationVar
+			SI = 	presetcustom4satInterpolationVar
+			VI = 	presetcustom4valInterpolationVar
+			AI =	presetcustom4alphaInterpolationVar
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+-- PRESET CONTROL END
+	:button
+	{
+		id = "AdvancedCancel",
+		label = "",
+		text = "Reload",
+		onclick = function()
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+		end
+	}
+	:show
+	{
+	wait = false, bounds = windowBounds
+	}
+end
+
 local function reloadColors(windowBounds)
 	local dlg
 	dlg = Dialog
@@ -1075,473 +1603,17 @@ local function reloadColors(windowBounds)
 			dlg:close()
 		end
 	}
-	:label
-	{
-		id = labelStrengthHue,
-		label = "Strength of:",
-		text= "Hue/Color"
-	}
-	:label
-	{
-		id=labelStrengthSaturation,
-		text= "Saturation"
-	}
-	:slider
-	{
-		id = "hueStrengthSlider",
-		min=0,
-		max=100,
-		value=HS,
-		onchange=function()
-			HS = dlg.data.hueStrengthSlider
-		end,
-		onrelease=function()
-			HS = dlg.data.hueStrengthSlider
-			reloadColors(dlg.bounds)
-			dlg:close()
-			end
-	}
-	:slider
-	{
-		id = "satStrengthSlider",
-		min=0,
-		max=100,
-		value=SS,
-		onchange=function()
-			SS = dlg.data.satStrengthSlider
-		end,
-		onrelease=function()
-			SS = dlg.data.satStrengthSlider
-			reloadColors(dlg.bounds)
-			dlg:close()
-			end
-	}
-	:label
-	{
-		id=labelStrengthValueLight,
-		label = "",
-		text= "Value/Light"
-	}
-	:label
-	{
-		id=labelStrengthAlpha,
-		text= "Alpha"
-	}
-	:slider
-	{
-		id = "valStrengthSlider",
-		min=0,
-		max=100,
-		value=VS,
-		onchange=function()
-			VS = dlg.data.valStrengthSlider
-		end,
-		onrelease=function()
-			VS = dlg.data.valStrengthSlider
-			reloadColors(dlg.bounds)
-			dlg:close()
-			end
-	}
-	:slider
-	{
-		id = "alphaStrengthSlider",
-		min=0,
-		max=100,
-		value=AS,
-		onchange=function()
-			AS = dlg.data.alphaStrengthSlider
-		end,
-		onrelease=function()
-			AS = dlg.data.alphaStrengthSlider
-			reloadColors(dlg.bounds)
-			dlg:close()
-			end
-	}
-	:label
-	{
-		id = "huelabel",
-		label = "Interpolations: ",
-		text = "Hue/Color"
-	}
-	:label
-	{
-		id = "satlabel",
-		text = "Saturation"
-	}
-	:label
-	{
-		id = "vallabel",
-		text = "Value/Light"
-	}
-	:label
-	{
-		id = "alphalabel",
-		text= "Alpha"
-	}
-	:combobox
-	{
-		id = "hueInterpolation",
-		option = HI,
-		options =
-		{
-			"Standard",
-			"Sine",
-			"Quad",
-			"Cubic",
-			"Circ",
-			"outSine",
-			"outQuad",
-			"outCubic",
-			"outCirc"
-		},
-		onchange = function()
-			HI = dlg.data.hueInterpolation
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:combobox
-	{
-		id = "satInterpolation",
-		option = SI,
-		options =
-		{
-			"Standard",
-			"Linear",
-			"Sine",
-			"Quad",
-			"Cubic",
-			"Circ",
-			"outSine",
-			"outQuad",
-			"outCubic",
-			"outCirc"
-		},
-		onchange = function()
-			SI = dlg.data.satInterpolation
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:combobox
-	{
-		id = "valInterpolation",
-		option = VI,
-		options =
-		{
-			"Standard",
-			"Linear",
-			"Sine",
-			"Quad",
-			"Cubic",
-			"Circ",
-			"outSine",
-			"outQuad",
-			"outCubic",
-			"outCirc"
-		},
-		onchange = function()
-			VI = dlg.data.valInterpolation
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:combobox
-	{
-		id = "alphaInterpolation",
-		option = AI,
-		options =
-		{
-			"Linear",
-			"Sine",
-			"Quad",
-			"Cubic",
-			"Circ",
-			"outSine",
-			"outQuad",
-			"outCubic",
-			"outCirc"
-		},
-		onchange = function()
-			AI = dlg.data.alphaInterpolation
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
--- COLOR CONTROL END
--- PRESET CONTROL
-	:separator
-	{
-		id = "separator",
-		text = "Presets",
-	}
+	
+	
+	-- ADVANCED SETTINGS BUTTON GOES HERE
 	:button
 	{
-		id = "buttonPreset1",
-		text = "Default",
+	id = "buttonSettings",
+		text = "Advanced Settings",
 		onclick = function()
-			CL = 	colorLeft
-			CR = 	colorRight
-			AOC = 	amountOfColorsVar
-			AOH = 	amountOfHuesVar
-			AOSH = 	amountOfSoftHuesVar
-			HS = 	hueStrength
-			SS = 	satStrength
-			VS = 	valStrenght
-			AS = 	alpaStrength
-			HI = 	hueInterpolationVar
-			SI = 	satInterpolationVar
-			VI = 	valInterpolationVar
-			AI =	alphaInterpolationVar
-			reloadColors(dlg.bounds)
-			dlg:close()
+			advancedSettings()
 		end
 	}
-	:button
-	{
-		id = "buttonPreset2",
-		text = "Beta",
-		onclick = function()
-			CL = 	Color{ r = 20, g = 20, b = 51, a = 255 }
-			CR = 	Color{ r = 230, g = 230, b = 195, a = 255 }
-			AOC = 	15
-			AOH = 	12
-			AOSH = 	6
-			HS = 	100
-			SS = 	100
-			VS = 	100
-			AS = 	100
-			HI = 	"Standard"
-			SI = 	"Quad"
-			VI = 	"Standard"
-			AI =	"Quad"
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPreset3",
-		text = "Preset 3",
-		onclick = function()
-			CL = 	Color{ r = 26, g = 34, b = 51, a = 255 }
-			CR = 	Color{ r = 242, g = 218, b = 170, a = 255 }
-			AOC = 	15
-			AOH = 	12
-			AOSH = 	6
-			HS = 	100
-			SS = 	100
-			VS = 	100
-			AS = 	100
-			HI = 	"Standard"
-			SI = 	"Circ"
-			VI = 	"Standard"
-			AI =	"Quad"
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPreset4",
-		text = "Preset 4",
-		onclick = function()
-			CL = 	Color{ r = 43, g = 22, b = 64, a = 255 }
-			CR = 	Color{ r = 228, g = 242, b = 157, a = 255 }
-			AOC = 	15
-			AOH = 	12
-			AOSH = 	6
-			HS = 	100
-			SS = 	100
-			VS = 	100
-			AS = 	100
-			HI = 	"Standard"
-			SI = 	"Quad"
-			VI = 	"Standard"
-			AI =	"Quad"
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPreset5",
-		label = "",
-		text = "Preset 5",
-		onclick = function()
-			CL = 	Color{ r = 0, g = 25, b = 38, a = 255 }
-			CR = 	Color{ r = 235, g = 235, b = 164, a = 255 }
-			AOC = 	15
-			AOH = 	12
-			AOSH = 	6
-			HS = 	100
-			SS = 	100
-			VS = 	100
-			AS = 	100
-			HI = 	"Standard"
-			SI = 	"Quad"
-			VI = 	"Standard"
-			AI =	"Quad"
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPreset6",
-		text = "Preset 6",
-		onclick = function()
-			CL = 	Color{ r = 0, g = 21, b = 64, a = 255 }
-			CR = 	Color{ r = 255, g = 255, b = 191, a = 255 }
-			AOC = 	15
-			AOH = 	12
-			AOSH = 	6
-			HS = 	100
-			SS = 	100
-			VS = 	100
-			AS = 	100
-			HI = 	"Standard"
-			SI = 	"Quad"
-			VI = 	"Standard"
-			AI =	"Quad"
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPreset7",
-		text = "Preset 7",
-		onclick = function()
-			CL = 	Color{ r = 0, g = 26, b = 51, a = 255 }
-			CR = 	Color{ r = 255, g = 247, b = 204, a = 255 }
-			AOC = 	15
-			AOH = 	12
-			AOSH = 	6
-			HS = 	100
-			SS = 	100
-			VS = 	100
-			AS = 	100
-			HI = 	"Standard"
-			SI = 	"Quad"
-			VI = 	"Standard"
-			AI =	"Quad"
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPreset8",
-		text = "Preset 8",
-		onclick = function()
-			CL = 	Color{ r = 34, g = 0, b = 51, a = 255 }
-			CR = 	Color{ r = 247, g = 255, b = 204, a = 255 }
-			AOC = 	15
-			AOH = 	12
-			AOSH = 	6
-			HS = 	80
-			SS = 	100
-			VS = 	100
-			AS = 	100
-			HI = 	"Standard"
-			SI = 	"Quad"
-			VI = 	"Standard"
-			AI =	"Quad"
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPresetCustom1",
-		label = "",
-		text = presetcustom1name,
-		onclick = function()
-			CL = 	presetcustom1colorLeft
-			CR = 	presetcustom1colorRight
-			AOC = 	presetcustom1amountOfColorsVar
-			AOH = 	presetcustom1amountOfHuesVar
-			AOSH = 	presetcustom1amountOfSoftHuesVar
-			HS = 	presetcustom1hueStrength
-			SS = 	presetcustom1satStrength
-			VS = 	presetcustom1valStrenght
-			AS = 	presetcustom1alpaStrength
-			HI = 	presetcustom1hueInterpolationVar
-			SI = 	presetcustom1satInterpolationVar
-			VI = 	presetcustom1valInterpolationVar
-			AI =	presetcustom1alphaInterpolationVar
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPresetCustom2",
-		text = presetcustom2name,
-		onclick = function()
-			CL = 	presetcustom2colorLeft
-			CR = 	presetcustom2colorRight
-			AOC = 	presetcustom2amountOfColorsVar
-			AOH = 	presetcustom2amountOfHuesVar
-			AOSH = 	presetcustom2amountOfSoftHuesVar
-			HS = 	presetcustom2hueStrength
-			SS = 	presetcustom2satStrength
-			VS = 	presetcustom2valStrenght
-			AS = 	presetcustom2alpaStrength
-			HI = 	presetcustom2hueInterpolationVar
-			SI = 	presetcustom2satInterpolationVar
-			VI = 	presetcustom2valInterpolationVar
-			AI =	presetcustom2alphaInterpolationVar
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPresetCustom3",
-		text = presetcustom3name,
-		onclick = function()
-			CL = 	presetcustom3colorLeft
-			CR = 	presetcustom3colorRight
-			AOC = 	presetcustom3amountOfColorsVar
-			AOH = 	presetcustom3amountOfHuesVar
-			AOSH = 	presetcustom3amountOfSoftHuesVar
-			HS = 	presetcustom3hueStrength
-			SS = 	presetcustom3satStrength
-			VS = 	presetcustom3valStrenght
-			AS = 	presetcustom3alpaStrength
-			HI = 	presetcustom3hueInterpolationVar
-			SI = 	presetcustom3satInterpolationVar
-			VI = 	presetcustom3valInterpolationVar
-			AI =	presetcustom3alphaInterpolationVar
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPresetCustom4",
-		text = presetcustom4name,
-		onclick = function()
-			CL = 	presetcustom4colorLeft
-			CR = 	presetcustom4colorRight
-			AOC = 	presetcustom4amountOfColorsVar
-			AOH = 	presetcustom4amountOfHuesVar
-			AOSH = 	presetcustom4amountOfSoftHuesVar
-			HS = 	presetcustom4hueStrength
-			SS = 	presetcustom4satStrength
-			VS = 	presetcustom4valStrenght
-			AS = 	presetcustom4alpaStrength
-			HI = 	presetcustom4hueInterpolationVar
-			SI = 	presetcustom4satInterpolationVar
-			VI = 	presetcustom4valInterpolationVar
-			AI =	presetcustom4alphaInterpolationVar
-			reloadColors(dlg.bounds)
-			dlg:close()
-		end
-	}
--- PRESET CONTROL END
 	:separator
 	{
 		id = "separator",
@@ -1872,10 +1944,16 @@ local function reloadColors(windowBounds)
 	:show
 	{
 	wait = false, bounds = windowBounds
-	}	
-
+	}
+	function reloadColorWindow()
+		reloadColors(dlg.bounds)
+		dlg:close()
+	end
 end
+
+
 
 do
 	reloadColors()
+	table.save({ r = 15, g = 15, b = { r = 15, g = 15, b = 30, a = 255 }, a = 255 },"porn.lua")
 end
