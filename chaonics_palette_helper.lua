@@ -1427,7 +1427,6 @@ local function advancedSettings(windowBounds)
 				saveSettings = "Save as"
 			end
 			advancedSettings(dlg.bounds)
-			reloadColorWindow()
 			dlg:close()
 		end
 	}
