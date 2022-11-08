@@ -777,6 +777,7 @@ local function paletteSaturationCalc()
 			tempColor.saturation = outCirc(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
 		end
 		-- print (tempColor.saturation)
+		-- print (CM.saturation)
 		table.insert(paletteSaturation, tempColor)
 	end
 	-- If it has a center, just add the main color in the middle
@@ -1600,7 +1601,13 @@ local function reloadColors(windowBounds)
 		id = "buttonSetLeft",
 		text = "Set",
 		onclick = function()
-				CL = app.fgColor
+				local tempColor = Color{}
+				tempColor = app.fgColor
+				CL = Color{}
+				CL.red = tempColor.red
+				CL.green = tempColor.green
+				CL.blue = tempColor.blue
+				CL.alpha = tempColor.alpha
 				reloadColors(dlg.bounds)
 				dlg:close()
 		end
@@ -1610,7 +1617,13 @@ local function reloadColors(windowBounds)
 		id = "buttonSetMain",
 		text = "Set",
 		onclick = function()
-				CM = app.fgColor
+				local tempColor = Color{}
+				tempColor = app.fgColor
+				CM = Color{}
+				CM.red = tempColor.red
+				CM.green = tempColor.green
+				CM.blue = tempColor.blue
+				CM.alpha = tempColor.alpha
 				reloadColors(dlg.bounds)
 				dlg:close()
 		end
@@ -1620,7 +1633,13 @@ local function reloadColors(windowBounds)
 		id = "buttonSetRight",
 		text = "Set",
 		onclick = function(ev)
-				CR = app.fgColor
+				local tempColor = Color{}
+				tempColor = app.fgColor
+				CR = Color{}
+				CR.red = tempColor.red
+				CR.green = tempColor.green
+				CR.blue = tempColor.blue
+				CR.alpha = tempColor.alpha
 				reloadColors(dlg.bounds)
 				dlg:close()
 		end
@@ -1630,7 +1649,13 @@ local function reloadColors(windowBounds)
 		id = "buttonSetClipboard",
 		text = "Set",
 		onclick = function(ev)
-				CC = app.fgColor
+				local tempColor = Color{}
+				tempColor = app.fgColor
+				CC = Color{}
+				CC.red = tempColor.red
+				CC.green = tempColor.green
+				CC.blue = tempColor.blue
+				CC.alpha = tempColor.alpha
 				reloadColors(dlg.bounds)
 				dlg:close()
 		end
