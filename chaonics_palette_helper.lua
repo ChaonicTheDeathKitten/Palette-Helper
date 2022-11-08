@@ -115,7 +115,6 @@ local satInterpolationVar = "Quad"
 local valInterpolationVar = "Sine"
 local alphaInterpolationVar = "Quad"
 local calcTable = {}
-local genericColorTable = {}
 
 -- CHANGED VALUES
 
@@ -272,12 +271,7 @@ end
 
 -- COLOR TABLE GENERATION
 
-local function generateColorTable()
-	genericColorTable = {}
-	for i = 1 , AOC do
-		table.insert(genericColorTable, CM)
-	end
-end
+
 
 
 local function paletteShadeCalc()
@@ -1542,9 +1536,8 @@ local function reloadColors(windowBounds)
 		title = "Chaonic's Palette Helper"
 	}
 	
-	-- First, let's get the calculation table and the generic palette
+	-- First, let's get the calculation table
 	generateCalcTable()
-	generateColorTable()
 
 
 -- DIALOG
