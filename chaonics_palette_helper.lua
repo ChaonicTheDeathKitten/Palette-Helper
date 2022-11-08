@@ -735,7 +735,6 @@ local function paletteSaturationCalc()
 	local copyColorAmount = AOC
 	local secondRound = 0
 	local hasCenter = false
-	reloadColorsNow = false
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -2155,5 +2154,5 @@ end
 
 do
 	reloadColors()
-	table.save({ r = 15, g = 15, b = { r = 15, g = 15, b = 30, a = 255 }, a = 255 },"porn.lua")
+	-- -- table.save({ r = 15, g = 15, b = { r = 15, g = 15, b = 30, a = 255 }, a = 255 },"corn.lua")
 end
