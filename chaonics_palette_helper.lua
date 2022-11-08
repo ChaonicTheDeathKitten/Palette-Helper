@@ -87,8 +87,8 @@ dofile( "table.save-1.0.lua" )
 
 -- ADVANCED SETTINGS VARIABLES
 
-local includeLeft = "Include Left Color"
-local includeRight = "Include Right Color"
+local includeLeft = "Include Left Extreme"
+local includeRight = "Include Right Extreme"
 local hasLeft = 0
 local hasRight = 0
 local copyColor = "*Copy Color*"
@@ -101,8 +101,17 @@ local interpolateHardHue = "No"
 
 -- STANDARD VALUES
 
+-- This is a bugfix.. I think..
+local colorBrush = app.fgColor
+-- Continuing
+
+
 local colorLeft = Color{ r = 15, g = 15, b = 30, a = 255 }
-local colorMain = app.fgColor
+local colorMain = Color{}
+colorMain.red = colorBrush.red
+colorMain.green = colorBrush.green
+colorMain.blue = colorBrush.blue
+colorMain.alpha = colorBrush.alpha
 local colorRight = Color{ r = 245, g = 245, b = 230, a = 255 }
 local colorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
 local amountOfColorsVar = 15
@@ -117,16 +126,11 @@ local satInterpolationVar = "Quad"
 local valInterpolationVar = "Sine"
 local alphaInterpolationVar = "Quad"
 local calcTable = {}
-local calcTableShade = {}
 
 -- CHANGED VALUES
 
 local CL = colorLeft
-local CM = Color{}
-CM.red = colorMain.red
-CM.green = colorMain.green
-CM.blue = colorMain.blue
-CM.alpha = colorMain.alpha
+local CM = colorMain
 local CR = colorRight
 local CC = colorClipboard
 local AOC = amountOfColorsVar
@@ -141,7 +145,6 @@ local SI = satInterpolationVar
 local VI = valInterpolationVar
 local AI = alphaInterpolationVar
 local CT = calcTable
-local ST = calcTableShade
 
 
 -- EASING CALCULATIONS
@@ -242,53 +245,6 @@ local tempTable = {}
 	-- Halve the number, we'll mirror it later
 	copyColorAmount = copyColorAmount/2
 	
-	
-	-- Let's get the actual numbers
-	local addNumber = 0
-	if hasCenter == true then
-		for i = 1 , copyColorAmount do
-			addNumber = math.abs(1-(i * (100/(copyColorAmount+1)))/100)
-			table.insert(tempTable, addNumber)
-		end
-		table.insert(tempTable, 0)
-		for i = 1 , copyColorAmount do
-			addNumber = (i * (100/(copyColorAmount+1)))/100
-			table.insert(tempTable, addNumber)
-		end
-	else
-		for i = 1 , copyColorAmount do
-			addNumber = ((100/copyColorAmount)*(copyColorAmount-(i*((copyColorAmount*2)/(copyColorAmount*2+1)))))/100
-			table.insert(tempTable, addNumber)
-		end
-		for i = 1 , copyColorAmount do
-			addNumber = ((100/copyColorAmount)*(math.abs((((copyColorAmount*2)/(copyColorAmount*2+1))*copyColorAmount)-copyColorAmount)+((i-1)*((copyColorAmount*2)/(copyColorAmount*2+1)))))/100
-			table.insert(tempTable, addNumber)
-		end
-	end
-	CT = tempTable
-	-- -- DEBUG
-	-- for k,v in pairs(tempTable) do
-	-- print(v)  
-	-- end
-	-- -- DEBUG END
-end
-
--- Wow, the shade calculation gets its own function, just to include the left and right color? Yes, indeed. If we want to adhere to the color amount, this needs to be done. A more experienced programmer would find an enormously better and faster solution. I'm a beginner and a small color script like this won't blow up anyones' PC. I just really hope I'm not copying a script breaking bug or something. There IS one, but I'm unable to figure out what causes it. This will be good for now. Yeah. All is good. Pssshht. Go sleep.
-
-local function generateShadeCalcTable()
-local hasCenter = false
-local copyColorAmount = AOC
-local tempTable = {}
-
-	-- If it has a center, remove and mark it
-	if copyColorAmount %2 == 1 then
-		copyColorAmount = copyColorAmount -1
-		hasCenter = true
-	end
-	
-	-- Halve the number, we'll mirror it later
-	copyColorAmount = copyColorAmount/2
-	
 	-- Separate the left and right
 	local copyColorAmountLeft = copyColorAmount - hasLeft
 	local copyColorAmountRight = copyColorAmount - hasRight
@@ -327,7 +283,7 @@ local tempTable = {}
 		table.insert(tempTable, 1)
 		end
 	end
-	ST = tempTable
+	CT = tempTable
 	-- -- DEBUG
 	-- for k,v in pairs(tempTable) do
 	-- print(v)  
@@ -363,104 +319,104 @@ local function paletteShadeCalc()
 	for i = 1, copyColorAmount do
 		local tempColor = Color{}
 		if HI == "Standard" then
-			tempColor.red = linear(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = linear(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = linear(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = linear(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = linear(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = linear(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		elseif HI == "Sine" then
-			tempColor.red = inSine(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = inSine(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = inSine(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = inSine(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = inSine(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = inSine(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		elseif HI == "Quad" then
-			tempColor.red = inQuad(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = inQuad(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = inQuad(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = inQuad(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = inQuad(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = inQuad(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		elseif HI == "Cubic" then
-			tempColor.red = inCubic(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = inCubic(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = inCubic(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = inCubic(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = inCubic(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = inCubic(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		elseif HI == "Circ" then
-			tempColor.red = inCirc(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = inCirc(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = inCirc(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = inCirc(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = inCirc(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = inCirc(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		elseif HI == "outSine" then
-			tempColor.red = outSine(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = outSine(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = outSine(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = outSine(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = outSine(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = outSine(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		elseif HI == "outQuad" then
-			tempColor.red = outQuad(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = outQuad(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = outQuad(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = outQuad(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = outQuad(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = outQuad(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		elseif HI == "outCubic" then
-			tempColor.red = outCubic(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = outCubic(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = outCubic(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = outCubic(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = outCubic(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = outCubic(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		elseif HI == "outCirc" then
-			tempColor.red = outCirc(ST[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = outCirc(ST[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = outCirc(ST[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
+			tempColor.red = outCirc(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
+			tempColor.green = outCirc(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
+			tempColor.blue = outCirc(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
 		end
 		if SI == "Standard" then
 			tempColor.saturation = tempColor.saturation
 		elseif SI == "Linear" then
-			tempColor.saturation = linear(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = linear(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		elseif SI == "Sine" then
-			tempColor.saturation = inSine(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = inSine(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		elseif SI == "Quad" then
-			tempColor.saturation = inQuad(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = inQuad(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		elseif SI == "Cubic" then
-			tempColor.saturation = inCubic(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = inCubic(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		elseif SI == "Circ" then
-			tempColor.saturation = inCirc(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = inCirc(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		elseif SI == "outSine" then
-			tempColor.saturation = outSine(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = outSine(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		elseif SI == "outQuad" then
-			tempColor.saturation = outQuad(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = outQuad(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		elseif SI == "outCubic" then
-			tempColor.saturation = outCubic(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = outCubic(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		elseif SI == "outCirc" then
-			tempColor.saturation = outCirc(ST[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = outCirc(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
 		end
 		if VI == "Standard" then
 			tempColor.value = tempColor.value
 		elseif VI == "Linear" then
-			tempColor.value = linear(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = linear(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		elseif VI == "Sine" then
-			tempColor.value = inSine(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = inSine(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		elseif VI == "Quad" then
-			tempColor.value = inQuad(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = inQuad(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		elseif VI == "Cubic" then
-			tempColor.value = inCubic(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = inCubic(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		elseif VI == "Circ" then
-			tempColor.value = inCirc(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = inCirc(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		elseif VI == "outSine" then
-			tempColor.value = outSine(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = outSine(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		elseif VI == "outQuad" then
-			tempColor.value = outQuad(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = outQuad(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		elseif VI == "outCubic" then
-			tempColor.value = outCubic(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = outCubic(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		elseif VI == "outCirc" then
-			tempColor.value = outCirc(ST[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+			tempColor.value = outCirc(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
 		end
 		if AI == "Standard" then
 			tempColor.alpha = tempColor.alpha
 		elseif AI == "Linear" then
-			tempColor.alpha = linear(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = linear(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "Sine" then
-			tempColor.alpha = inSine(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = inSine(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "Quad" then
-			tempColor.alpha = inQuad(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = inQuad(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "Cubic" then
-			tempColor.alpha = inCubic(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = inCubic(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "Circ" then
-			tempColor.alpha = inCirc(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = inCirc(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "outSine" then
-			tempColor.alpha = outSine(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = outSine(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "outQuad" then
-			tempColor.alpha = outQuad(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = outQuad(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "outCubic" then
-			tempColor.alpha = outCubic(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = outCubic(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		elseif AI == "outCirc" then
-			tempColor.alpha = outCirc(ST[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
+			tempColor.alpha = outCirc(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
 		end
 		table.insert(paletteShade, tempColor)
 	end
@@ -473,104 +429,104 @@ local function paletteShadeCalc()
 	for y = 1, copyColorAmount do
 		local tempColor = Color{}
 		if HI == "Standard" then
-			tempColor.red = linear(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = linear(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = linear(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = linear(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = linear(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = linear(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		elseif HI == "Sine" then
-			tempColor.red = inSine(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = inSine(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = inSine(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = inSine(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = inSine(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = inSine(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		elseif HI == "Quad" then
-			tempColor.red = inQuad(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = inQuad(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = inQuad(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = inQuad(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = inQuad(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = inQuad(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		elseif HI == "Cubic" then
-			tempColor.red = inCubic(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = inCubic(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = inCubic(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = inCubic(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = inCubic(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = inCubic(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		elseif HI == "Circ" then
-			tempColor.red = inCirc(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = inCirc(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = inCirc(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = inCirc(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = inCirc(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = inCirc(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		elseif HI == "outSine" then
-			tempColor.red = outSine(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = outSine(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = outSine(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = outSine(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = outSine(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = outSine(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		elseif HI == "outQuad" then
-			tempColor.red = outQuad(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = outQuad(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = outQuad(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = outQuad(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = outQuad(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = outQuad(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		elseif HI == "outCubic" then
-			tempColor.red = outCubic(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = outCubic(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = outCubic(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = outCubic(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = outCubic(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = outCubic(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		elseif HI == "outCirc" then
-			tempColor.red = outCirc(ST[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = outCirc(ST[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = outCirc(ST[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
+			tempColor.red = outCirc(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
+			tempColor.green = outCirc(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
+			tempColor.blue = outCirc(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
 		end
 		if SI == "Standard" then
 			tempColor.saturation = tempColor.saturation
 		elseif SI == "Linear" then
-			tempColor.saturation = linear(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		elseif SI == "Sine" then
-			tempColor.saturation = inSine(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = inSine(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		elseif SI == "Quad" then
-			tempColor.saturation = inQuad(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = inQuad(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		elseif SI == "Cubic" then
-			tempColor.saturation = inCubic(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = inCubic(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		elseif SI == "Circ" then
-			tempColor.saturation = inCirc(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = inCirc(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		elseif SI == "outSine" then
-			tempColor.saturation = outSine(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = outSine(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		elseif SI == "outQuad" then
-			tempColor.saturation = outQuad(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = outQuad(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		elseif SI == "outCubic" then
-			tempColor.saturation = outCubic(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = outCubic(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		elseif SI == "outCirc" then
-			tempColor.saturation = outCirc(ST[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = outCirc(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
 		end
 		if VI == "Standard" then
 			tempColor.value = tempColor.value
 		elseif VI == "Linear" then
-			tempColor.value = linear(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = linear(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		elseif VI == "Sine" then
-			tempColor.value = inSine(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = inSine(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		elseif VI == "Quad" then
-			tempColor.value = inQuad(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = inQuad(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		elseif VI == "Cubic" then
-			tempColor.value = inCubic(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = inCubic(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		elseif VI == "Circ" then
-			tempColor.value = inCirc(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = inCirc(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		elseif VI == "outSine" then
-			tempColor.value = outSine(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = outSine(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		elseif VI == "outQuad" then
-			tempColor.value = outQuad(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = outQuad(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		elseif VI == "outCubic" then
-			tempColor.value = outCubic(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = outCubic(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		elseif VI == "outCirc" then
-			tempColor.value = outCirc(ST[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+			tempColor.value = outCirc(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
 		end
 		if AI == "Standard" then
 			tempColor.alpha = tempColor.alpha
 		elseif AI == "Linear" then
-			tempColor.alpha = linear(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = linear(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		elseif AI == "Sine" then
-			tempColor.alpha = inSine(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = inSine(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		elseif AI == "Quad" then
-			tempColor.alpha = inQuad(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = inQuad(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		elseif AI == "Cubic" then
-			tempColor.alpha = inCubic(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = inCubic(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		elseif AI == "Circ" then
-			tempColor.alpha = inCirc(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = inCirc(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		elseif AI == "outSine" then
-			tempColor.alpha = outSine(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = outSine(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		elseif AI == "outQuad" then
-			tempColor.alpha = outQuad(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = outQuad(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		elseif AI == "outCubic" then
-			tempColor.alpha = outCubic(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = outCubic(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		elseif AI == "outCirc" then
-			tempColor.alpha = outCirc(ST[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = outCirc(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
 		end
 		-- print (tempColor.saturation)
 		table.insert(paletteShade, tempColor)
@@ -1605,7 +1561,6 @@ local function reloadColors(windowBounds)
 	
 	-- First, let's get the calculation table
 	generateCalcTable()
-	generateShadeCalcTable()
 
 
 -- DIALOG
@@ -1770,13 +1725,13 @@ local function reloadColors(windowBounds)
 		id = "buttonIncludeLeft",
 		text = includeLeft,
 		onclick = function()
-			if includeLeft == "Include Left Color" then
-				includeLeft = "*Includes Left Color*"
+			if includeLeft == "Include Left Extreme" then
+				includeLeft = "*Includes Left Extreme*"
 				hasLeft = 1
 				reloadColors(dlg.bounds)
 				dlg:close()
 			else
-				includeLeft = "Include Left Color"
+				includeLeft = "Include Left Extreme"
 				hasLeft = 0
 				reloadColors(dlg.bounds)
 				dlg:close()
@@ -1788,13 +1743,13 @@ local function reloadColors(windowBounds)
 		id = "buttonIncludeRight",
 		text = includeRight,
 		onclick = function()
-			if includeRight == "Include Right Color" then
-				includeRight = "*Includes Right Color*"
+			if includeRight == "Include Right Extreme" then
+				includeRight = "*Includes Right Extreme*"
 				hasRight = 1
 				reloadColors(dlg.bounds)
 				dlg:close()
 			else
-				includeRight = "Include Right Color"
+				includeRight = "Include Right Extreme"
 				hasRight = 0
 				reloadColors(dlg.bounds)
 				dlg:close()
