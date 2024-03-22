@@ -80,11 +80,6 @@ local presetcustom4alphaInterpolationVar =		"Linear"
 
 -- WAIT FUNCTION
 
-
--- DEPENDENCIES
-
-dofile( "table.save-1.0.lua" )
-
 -- ADVANCED SETTINGS VARIABLES
 
 local includeLeft = "Include Left Color"
