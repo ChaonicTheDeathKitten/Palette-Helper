@@ -2576,6 +2576,7 @@ local function reloadColors(windowBounds)
 			CR = colorRight
 			CC = colorClipboard
 			AOC = amountOfColorsVar
+			AOSH = amountOfSoftHuesVar
 			AOH = amountOfHuesVar
 			HS = hueStrength
 			SS = satStrength
