@@ -224,7 +224,7 @@ end
 
 -- END OF EASING CALCULATIONS
 
--- OKLab CONVERSIONS
+-- OKLAB CONVERSIONS
 -- I've abandoned all hope in learning how to translate the original conversions into LUA
 -- This is why I'm resorting to the work of Jeremy Behreandt, who has kindly posted his versions under the MIT license.
 -- I want to expressly say THANK YOU for all the help you've provided me in the past to make my tool possible and keep on doing so.
@@ -1048,9 +1048,7 @@ function ok_color.toe_inv(x)
     end
 end
 
-return ok_color
-
--- END OF OKHSL CONVERSIONS
+-- END OF OKLAB CONVERSIONS
 
 -- CALCULATION TABLE GENERATION
 
