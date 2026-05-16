@@ -117,7 +117,7 @@ local satStrength = 100
 local valStrength = 100
 local alphaStrength = 100
 local hueInterpolationVar = "Standard"
-local satInterpolationVar = "Sine"
+local satInterpolationVar = "Standard"
 local valInterpolationVar = "Standard"
 local alphaInterpolationVar = "Linear"
 local calcTable = {}
@@ -1450,7 +1450,7 @@ end
 -- Going from 10 easing functions to 23 seems.. excessive.. I hope that this isn't... TOO much? Drop down menus will get very long..
 -- But on the other hand, those ARE more options to play around with..
 
-local easingCalculations =
+local easingCalculation =
 	{
 	Standard = linear,
 	Linear = linear,
@@ -1489,10 +1489,10 @@ local function paletteShadeCalc()
 	local hasCenter = false
 	
 	-- Choose the right easing calculation from the list for later
-	local hueInterpolationCalc = easingCalculations[HI]
-	local satInterpolationCalc = easingCalculations[SI]
-	local valInterpolationCalc = easingCalculations[VI]
-	local alphaInterpolationCalc = easingCalculations[AI]
+	local hueInterpolationCalc = easingCalculation[HI]
+	local satInterpolationCalc = easingCalculation[SI]
+	local valInterpolationCalc = easingCalculation[VI]
+	local alphaInterpolationCalc = easingCalculation[AI]
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -1508,106 +1508,34 @@ local function paletteShadeCalc()
 	-- Starting with left color to main color
 	for i = 1, copyColorAmount do
 		local tempColor = Color{}
-		if HI == "Standard" then
-			tempColor.red = linear(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = linear(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = linear(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		elseif HI == "Sine" then
-			tempColor.red = inSine(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = inSine(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = inSine(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		elseif HI == "Quad" then
-			tempColor.red = inQuad(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = inQuad(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = inQuad(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		elseif HI == "Cubic" then
-			tempColor.red = inCubic(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = inCubic(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = inCubic(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		elseif HI == "Circ" then
-			tempColor.red = inCirc(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = inCirc(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = inCirc(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		elseif HI == "outSine" then
-			tempColor.red = outSine(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = outSine(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = outSine(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		elseif HI == "outQuad" then
-			tempColor.red = outQuad(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = outQuad(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = outQuad(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		elseif HI == "outCubic" then
-			tempColor.red = outCubic(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = outCubic(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = outCubic(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		elseif HI == "outCirc" then
-			tempColor.red = outCirc(CT[i]*(HS/100), CM.red, CL.red-CM.red, 1)
-			tempColor.green = outCirc(CT[i]*(HS/100), CM.green, CL.green-CM.green, 1)
-			tempColor.blue = outCirc(CT[i]*(HS/100), CM.blue, CL.blue-CM.blue, 1)
-		end
+		
+		-- First comes the hue interpolation
+		local colorTableCalculation = CT[i]*(HS/100)
+		tempColor.red = hueInterpolationCalc(colorTableCalculation, CM.red, CL.red-CM.red, 1)
+		tempColor.green = hueInterpolationCalc(colorTableCalculation, CM.green, CL.green-CM.green, 1)
+		tempColor.blue = hueInterpolationCalc(colorTableCalculation, CM.blue, CL.blue-CM.blue, 1)
+
+		-- Then comes the saturation interpolation. Standard here preserves the loss in saturation in linear RGB interpolation. Meanwhile linear interpolates the saturation of each endpoint.
+		local colorTableCalculation = CT[i]*(SS/100)
 		if SI == "Standard" then
 			tempColor.saturation = tempColor.saturation
-		elseif SI == "Linear" then
-			tempColor.saturation = linear(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
-		elseif SI == "Sine" then
-			tempColor.saturation = inSine(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
-		elseif SI == "Quad" then
-			tempColor.saturation = inQuad(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
-		elseif SI == "Cubic" then
-			tempColor.saturation = inCubic(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
-		elseif SI == "Circ" then
-			tempColor.saturation = inCirc(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
-		elseif SI == "outSine" then
-			tempColor.saturation = outSine(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
-		elseif SI == "outQuad" then
-			tempColor.saturation = outQuad(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
-		elseif SI == "outCubic" then
-			tempColor.saturation = outCubic(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
-		elseif SI == "outCirc" then
-			tempColor.saturation = outCirc(CT[i]*(SS/100), CM.saturation, CL.saturation-CM.saturation, 1)
+		else
+			tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, CL.saturation-CM.saturation, 1)
 		end
+		
+		-- Then comes the value interpolation.. I don't think I've ever tweaked this for my own colors, but someone might!
+		local colorTableCalculation = CT[i]*(VS/100)
 		if VI == "Standard" then
 			tempColor.value = tempColor.value
-		elseif VI == "Linear" then
-			tempColor.value = linear(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
-		elseif VI == "Sine" then
-			tempColor.value = inSine(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
-		elseif VI == "Quad" then
-			tempColor.value = inQuad(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
-		elseif VI == "Cubic" then
-			tempColor.value = inCubic(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
-		elseif VI == "Circ" then
-			tempColor.value = inCirc(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
-		elseif VI == "outSine" then
-			tempColor.value = outSine(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
-		elseif VI == "outQuad" then
-			tempColor.value = outQuad(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
-		elseif VI == "outCubic" then
-			tempColor.value = outCubic(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
-		elseif VI == "outCirc" then
-			tempColor.value = outCirc(CT[i]*(VS/100), CM.value, CL.value-CM.value, 1)
+		else
+			tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CL.value-CM.value, 1)
 		end
-		if AI == "Standard" then
-			tempColor.alpha = tempColor.alpha
-		elseif AI == "Linear" then
-			tempColor.alpha = linear(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		elseif AI == "Sine" then
-			tempColor.alpha = inSine(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		elseif AI == "Quad" then
-			tempColor.alpha = inQuad(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		elseif AI == "Cubic" then
-			tempColor.alpha = inCubic(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		elseif AI == "Circ" then
-			tempColor.alpha = inCirc(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		elseif AI == "outSine" then
-			tempColor.alpha = outSine(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		elseif AI == "outQuad" then
-			tempColor.alpha = outQuad(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		elseif AI == "outCubic" then
-			tempColor.alpha = outCubic(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		elseif AI == "outCirc" then
-			tempColor.alpha = outCirc(CT[i]*(AS/100), CM.alpha, CL.alpha-CM.alpha, 1)
-		end
+		
+		-- Lastly, the Alpha channel is interpolated!
+		local colorTableCalculation = CT[i]*(AS/100)
+		tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CL.alpha-CM.alpha, 1)
+		
+		-- And print! I mean not actually printing. But now the first half of the table is created!
 		table.insert(paletteShade, tempColor)
 	end
 	-- If it has a center, just add the main color in the middle
@@ -1618,109 +1546,40 @@ local function paletteShadeCalc()
 	-- Lastly, main color to right color
 	for y = 1, copyColorAmount do
 		local tempColor = Color{}
-		if HI == "Standard" then
-			tempColor.red = linear(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = linear(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = linear(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		elseif HI == "Sine" then
-			tempColor.red = inSine(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = inSine(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = inSine(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		elseif HI == "Quad" then
-			tempColor.red = inQuad(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = inQuad(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = inQuad(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		elseif HI == "Cubic" then
-			tempColor.red = inCubic(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = inCubic(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = inCubic(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		elseif HI == "Circ" then
-			tempColor.red = inCirc(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = inCirc(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = inCirc(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		elseif HI == "outSine" then
-			tempColor.red = outSine(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = outSine(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = outSine(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		elseif HI == "outQuad" then
-			tempColor.red = outQuad(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = outQuad(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = outQuad(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		elseif HI == "outCubic" then
-			tempColor.red = outCubic(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = outCubic(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = outCubic(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		elseif HI == "outCirc" then
-			tempColor.red = outCirc(CT[y+secondRound]*(HS/100), CM.red, CR.red-CM.red, 1)
-			tempColor.green = outCirc(CT[y+secondRound]*(HS/100), CM.green, CR.green-CM.green, 1)
-			tempColor.blue = outCirc(CT[y+secondRound]*(HS/100), CM.blue, CR.blue-CM.blue, 1)
-		end
+		
+		-- Hue interpolation again!
+		local colorTableCalculation = CT[y+secondRound]*(HS/100)
+		tempColor.red = hueInterpolationCalc(colorTableCalculation, CM.red, CR.red-CM.red, 1)
+		tempColor.green = hueInterpolationCalc(colorTableCalculation, CM.green, CR.green-CM.green, 1)
+		tempColor.blue = hueInterpolationCalc(colorTableCalculation, CM.blue, CR.blue-CM.blue, 1)
+
+		-- Then the saturation!
+		local colorTableCalculation = CT[y+secondRound]*(SS/100)
 		if SI == "Standard" then
 			tempColor.saturation = tempColor.saturation
-		elseif SI == "Linear" then
-			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
-		elseif SI == "Sine" then
-			tempColor.saturation = inSine(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
-		elseif SI == "Quad" then
-			tempColor.saturation = inQuad(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
-		elseif SI == "Cubic" then
-			tempColor.saturation = inCubic(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
-		elseif SI == "Circ" then
-			tempColor.saturation = inCirc(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
-		elseif SI == "outSine" then
-			tempColor.saturation = outSine(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
-		elseif SI == "outQuad" then
-			tempColor.saturation = outQuad(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
-		elseif SI == "outCubic" then
-			tempColor.saturation = outCubic(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
-		elseif SI == "outCirc" then
-			tempColor.saturation = outCirc(CT[y+secondRound]*(SS/100), CM.saturation, CR.saturation-CM.saturation, 1)
+		else
+			tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, CR.saturation-CM.saturation, 1)
 		end
+		
+		-- Now comes the (useless) value calculation. Luckily, standard skips it. I really wonder if I should keep this... Or change the order of operation to before saturation??.. Who cares?!
+		local colorTableCalculation = CT[y+secondRound]*(VS/100)
 		if VI == "Standard" then
 			tempColor.value = tempColor.value
-		elseif VI == "Linear" then
-			tempColor.value = linear(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
-		elseif VI == "Sine" then
-			tempColor.value = inSine(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
-		elseif VI == "Quad" then
-			tempColor.value = inQuad(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
-		elseif VI == "Cubic" then
-			tempColor.value = inCubic(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
-		elseif VI == "Circ" then
-			tempColor.value = inCirc(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
-		elseif VI == "outSine" then
-			tempColor.value = outSine(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
-		elseif VI == "outQuad" then
-			tempColor.value = outQuad(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
-		elseif VI == "outCubic" then
-			tempColor.value = outCubic(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
-		elseif VI == "outCirc" then
-			tempColor.value = outCirc(CT[y+secondRound]*(VS/100), CM.value, CR.value-CM.value, 1)
+		else
+			tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CR.value-CM.value, 1)
 		end
+		
+		-- Lastly we interpolate the alpha value!
+		local colorTableCalculation = CT[y+secondRound]*(AS/100)
 		if AI == "Standard" then
 			tempColor.alpha = tempColor.alpha
 		elseif AI == "Linear" then
-			tempColor.alpha = linear(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
-		elseif AI == "Sine" then
-			tempColor.alpha = inSine(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
-		elseif AI == "Quad" then
-			tempColor.alpha = inQuad(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
-		elseif AI == "Cubic" then
-			tempColor.alpha = inCubic(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
-		elseif AI == "Circ" then
-			tempColor.alpha = inCirc(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
-		elseif AI == "outSine" then
-			tempColor.alpha = outSine(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
-		elseif AI == "outQuad" then
-			tempColor.alpha = outQuad(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
-		elseif AI == "outCubic" then
-			tempColor.alpha = outCubic(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
-		elseif AI == "outCirc" then
-			tempColor.alpha = outCirc(CT[y+secondRound]*(AS/100), CM.alpha, CR.alpha-CM.alpha, 1)
+			tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CR.alpha-CM.alpha, 1)
 		end
 		-- print (tempColor.saturation)
 		table.insert(paletteShade, tempColor)
 	end
+	-- Oh hi debug code from ages ago! I have no idea what you're doing anymore, but I don't wanna delete you! Ultimate proof I've only learned enough lua to write this plugin..
 	-- -- DEBUG
 	-- for k,v in pairs(paletteShade) do
 	-- print(v)  
@@ -1735,6 +1594,9 @@ local function paletteLightCalc()
 	local copyColorAmount = AOC
 	local secondRound = 0
 	local hasCenter = false
+	
+	-- This one only needs a value/lightness easing calculation
+	local valInterpolationCalc = easingCalculation[VI]
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -1755,27 +1617,11 @@ local function paletteLightCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (tempColor.lightness)
-		if VI == "Standard" then
-			tempColor.lightness = linear(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "Linear" then
-			tempColor.lightness = linear(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "Sine" then
-			tempColor.lightness = inSine(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "Quad" then
-			tempColor.lightness = inQuad(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "Cubic" then
-			tempColor.lightness = inCubic(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "Circ" then
-			tempColor.lightness = inCirc(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "outSine" then
-			tempColor.lightness = outSine(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "outQuad" then
-			tempColor.lightness = outQuad(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "outCubic" then
-			tempColor.lightness = outCubic(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		elseif VI == "outCirc" then
-			tempColor.lightness = outCirc(CT[i]*(VS/100), CM.lightness, 0-CM.lightness, 1)
-		end
+		
+		-- This is where the magic is happening!
+		local colorTableCalculation = CT[i]*(VS/100)
+		tempColor.lightness = valInterpolationCalc(colorTableCalculation, CM.lightness, 0-CM.lightness, 1)
+		
 		-- print (tempColor.lightness)
 		table.insert(paletteLight, tempColor)
 	end
@@ -1792,27 +1638,11 @@ local function paletteLightCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (CT[y+secondRound])
-		if VI == "Standard" then
-			tempColor.lightness = linear(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "Linear" then
-			tempColor.lightness = linear(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "Sine" then
-			tempColor.lightness = inSine(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "Quad" then
-			tempColor.lightness = inQuad(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "Cubic" then
-			tempColor.lightness = inCubic(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "Circ" then
-			tempColor.lightness = inCirc(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "outSine" then
-			tempColor.lightness = outSine(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "outQuad" then
-			tempColor.lightness = outQuad(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "outCubic" then
-			tempColor.lightness = outCubic(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		elseif VI == "outCirc" then
-			tempColor.lightness = outCirc(CT[y+secondRound]*(VS/100), CM.lightness, 1-CM.lightness, 1)
-		end
+		
+		-- And the magic continues
+		local colorTableCalculation = CT[y+secondRound]*(VS/100)
+		tempColor.lightness = valInterpolationCalc(colorTableCalculation, CM.lightness, 1-CM.lightness, 1)
+		
 		-- print (tempColor.lightness)
 		table.insert(paletteLight, tempColor)
 	end
@@ -1830,6 +1660,9 @@ local function paletteValueCalc()
 	local copyColorAmount = AOC
 	local secondRound = 0
 	local hasCenter = false
+
+	-- This one only needs a value/lightness easing calculation
+	local valInterpolationCalc = easingCalculation[VI]
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -1850,27 +1683,11 @@ local function paletteValueCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (tempColor.value)
-		if VI == "Standard" then
-			tempColor.value = linear(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "Linear" then
-			tempColor.value = linear(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "Sine" then
-			tempColor.value = inSine(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "Quad" then
-			tempColor.value = inQuad(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "Cubic" then
-			tempColor.value = inCubic(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "Circ" then
-			tempColor.value = inCirc(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "outSine" then
-			tempColor.value = outSine(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "outQuad" then
-			tempColor.value = outQuad(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "outCubic" then
-			tempColor.value = outCubic(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		elseif VI == "outCirc" then
-			tempColor.value = outCirc(CT[i]*(VS/100), CM.value, 0-CM.value, 1)
-		end
+
+		-- Do the magic!
+		local colorTableCalculation = CT[i]*(VS/100)
+		tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, 0-CM.value, 1)
+
 		-- print (tempColor.value)
 		table.insert(paletteValue, tempColor)
 	end
@@ -1887,27 +1704,11 @@ local function paletteValueCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (CT[y+secondRound])
-		if VI == "Standard" then
-			tempColor.value = linear(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "Linear" then
-			tempColor.value = linear(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "Sine" then
-			tempColor.value = inSine(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "Quad" then
-			tempColor.value = inQuad(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "Cubic" then
-			tempColor.value = inCubic(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "Circ" then
-			tempColor.value = inCirc(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "outSine" then
-			tempColor.value = outSine(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "outQuad" then
-			tempColor.value = outQuad(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "outCubic" then
-			tempColor.value = outCubic(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		elseif VI == "outCirc" then
-			tempColor.value = outCirc(CT[y+secondRound]*(VS/100), CM.value, 1-CM.value, 1)
-		end
+
+		-- Here's the magic again!
+		local colorTableCalculation = CT[y+secondRound]*(VS/100)
+		tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, 1-CM.value, 1)
+		
 		-- print (tempColor.value)
 		table.insert(paletteValue, tempColor)
 	end
@@ -1925,6 +1726,9 @@ local function paletteSaturationCalc()
 	local copyColorAmount = AOC
 	local secondRound = 0
 	local hasCenter = false
+	
+	-- This one only needs a saturation easing calculation
+	local satInterpolationCalc = easingCalculation[SI]
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -1945,27 +1749,11 @@ local function paletteSaturationCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (tempColor.saturation)
-		if SI == "Standard" then
-			tempColor.saturation = linear(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "Linear" then
-			tempColor.saturation = linear(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "Sine" then
-			tempColor.saturation = inSine(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "Quad" then
-			tempColor.saturation = inQuad(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "Cubic" then
-			tempColor.saturation = inCubic(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "Circ" then
-			tempColor.saturation = inCirc(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "outSine" then
-			tempColor.saturation = outSine(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "outQuad" then
-			tempColor.saturation = outQuad(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "outCubic" then
-			tempColor.saturation = outCubic(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		elseif SI == "outCirc" then
-			tempColor.saturation = outCirc(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		end
+		
+		-- Let the magic move you!
+		local colorTableCalculation = CT[i]*(SS/100)
+		tempColor.saturation = satInterpolationCalc(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
+		
 		-- print (tempColor.saturation)
 		-- print (CM.saturation)
 		table.insert(paletteSaturation, tempColor)
@@ -1983,27 +1771,11 @@ local function paletteSaturationCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (CT[y+secondRound])
-		if SI == "Standard" then
-			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "Linear" then
-			tempColor.saturation = linear(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "Sine" then
-			tempColor.saturation = inSine(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "Quad" then
-			tempColor.saturation = inQuad(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "Cubic" then
-			tempColor.saturation = inCubic(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "Circ" then
-			tempColor.saturation = inCirc(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "outSine" then
-			tempColor.saturation = outSine(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "outQuad" then
-			tempColor.saturation = outQuad(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "outCubic" then
-			tempColor.saturation = outCubic(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		elseif SI == "outCirc" then
-			tempColor.saturation = outCirc(CT[y+secondRound]*(SS/100), CM.saturation, 0-CM.saturation, 1)
-		end
+
+		-- Second round of magic!
+		local colorTableCalculation = CT[y+secondRound]*(SS/100)
+		tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, 0-CM.saturation, 1)
+		
 		-- print (tempColor.saturation)
 		table.insert(paletteSaturation, tempColor)
 	end
@@ -2018,6 +1790,9 @@ end
 
 local function paletteHueCalc()
 	paletteHue = {}
+	
+	-- This one only needs a hue easing calculation
+	local hueInterpolationCalc = easingCalculation[HI]
 
 	for i = 1, AOH do
 		local tempColor = Color{}
@@ -2026,52 +1801,21 @@ local function paletteHueCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (tempColor.hue)
+		
+		-- Ooooh! This magic looks more advanced!... But is it? *insert VSauce sounds* (I REALLY need to take this more seriously)
+		local colorTableCalculation = (1/AOH)*(i-1)
 		if HI == "Standard" or interpolateHardHue == "No" then
-			tempColor.hue = linear((1/AOH)*(i-1), CM.hue, 360, 1)
+			tempColor.hue = linear(colorTableCalculation, CM.hue, 360, 1)
 			while tempColor.hue >= 360 do
 				tempColor.hue = tempColor.hue - 360
 			end
-		elseif HI == "Sine" then
-			tempColor.hue = inSine((1/AOH)*(i-1), CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "Quad" then
-			tempColor.hue = inQuad((1/AOH)*(i-1), CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "Cubic" then
-			tempColor.hue = inCubic((1/AOH)*(i-1), CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "Circ" then
-			tempColor.hue = inCirc((1/AOH)*(i-1), CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "outSine" then
-			tempColor.hue = outSine((1/AOH)*(i-1), CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "outQuad" then
-			tempColor.hue = outQuad((1/AOH)*(i-1), CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "outCubic" then
-			tempColor.hue = outCubic((1/AOH)*(i-1), CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "outCirc" then
-			tempColor.hue = outCirc((1/AOH)*(i-1), CM.hue, 360, 1)
+		else
+			tempColor.hue = hueInterpolationCalc(colorTableCalculation, CM.hue, 360, 1)
 			while tempColor.hue >= 360 do
 				tempColor.hue = tempColor.hue - 360
 			end
 		end
+		
 		-- print (tempColor.hue)
 		table.insert(paletteHue, tempColor)
 	end
@@ -2086,6 +1830,9 @@ end
 
 local function paletteSoftHueCalc()
 	paletteSoftHue = {}
+	
+	-- This one only needs a hue easing calculation
+	local hueInterpolationCalc = easingCalculation[HI]
 
 	for i = 1, AOSH do
 		local tempColor = Color{}
@@ -2094,48 +1841,16 @@ local function paletteSoftHueCalc()
 		tempColor.blue = CM.blue
 		tempColor.alpha = CM.alpha
 		-- print (tempColor.hue)
+		
+		-- Here comes the last time for the easing magic!
+		local colorTableCalculation = (1/AOSH)*(i-1)
 		if HI == "Standard" or interpolateSoftHue == "No" then
-			tempColor.hue = linear((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
+			tempColor.hue = linear(colorTableCalculation, CM.hue, 360/AOH, 1)
 			while tempColor.hue >= 360 do
 				tempColor.hue = tempColor.hue - 360
 			end
-		elseif HI == "Sine" then
-			tempColor.hue = inSine((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "Quad" then
-			tempColor.hue = inQuad((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "Cubic" then
-			tempColor.hue = inCubic((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "Circ" then
-			tempColor.hue = inCirc((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "outSine" then
-			tempColor.hue = outSine((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "outQuad" then
-			tempColor.hue = outQuad((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "outCubic" then
-			tempColor.hue = outCubic((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		elseif HI == "outCirc" then
-			tempColor.hue = outCirc((1/AOSH)*(i-1), CM.hue, 360/AOH, 1)
+		else
+			tempColor.hue = hueInterpolationCalc(colorTableCalculation, CM.hue, 360/AOH, 1)
 			while tempColor.hue >= 360 do
 				tempColor.hue = tempColor.hue - 360
 			end
