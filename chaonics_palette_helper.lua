@@ -108,7 +108,7 @@ colorMain.green = colorBrush.green
 colorMain.blue = colorBrush.blue
 colorMain.alpha = colorBrush.alpha
 local colorRight = Color{ r = 245, g = 245, b = 230, a = 255 }
-local colorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
+local colorBlackDarkest = Color{ r = 0, g = 0, b = 0, a = 255 }
 local amountOfColorsVar = 9
 local amountOfHuesVar = 9
 local amountOfSoftHuesVar = 6
@@ -121,13 +121,15 @@ local satInterpolationVar = "Sine"
 local valInterpolationVar = "Standard"
 local alphaInterpolationVar = "Linear"
 local calcTable = {}
+local colorSpaceOklab = "*OKLab*"
+local colorSpaceRGB = "RGB"
 
 -- CHANGED VALUES
 
 local CL = colorLeft
 local CM = colorMain
 local CR = colorRight
-local CC = colorClipboard
+local CBD = colorBlackDarkest
 local AOC = amountOfColorsVar
 local AOH = amountOfHuesVar
 local AOSH = amountOfSoftHuesVar
@@ -1446,6 +1448,7 @@ end
 
 -- STUFF TO MAKE THE CALCULATIONS MORE COMPACT... BECAUSE OTHERWISE MY APPROACH GETS WAYYYY OUT OF HAND
 -- Going from 10 easing functions to 23 seems.. excessive.. I hope that this isn't... TOO much? Drop down menus will get very long..
+-- But on the other hand, those ARE more options to play around with..
 
 local easingCalculations =
 	{
@@ -1484,7 +1487,12 @@ local function paletteShadeCalc()
 	local copyColorAmount = AOC
 	local secondRound = 0
 	local hasCenter = false
-
+	
+	-- Choose the right easing calculation from the list for later
+	local hueInterpolationCalc = easingCalculations[HI]
+	local satInterpolationCalc = easingCalculations[SI]
+	local valInterpolationCalc = easingCalculations[VI]
+	local alphaInterpolationCalc = easingCalculations[AI]
 	
 	-- If it has a center, remove and mark it
 	if copyColorAmount %2 == 1 then
@@ -2276,10 +2284,23 @@ local function advancedSettings(windowBounds)
 			"Quad",
 			"Cubic",
 			"Circ",
+			"Quart",
+			"Quint",
+			"Expo",
 			"outSine",
 			"outQuad",
 			"outCubic",
-			"outCirc"
+			"outCirc",
+			"outQuart",
+			"outQuint",
+			"outExpo",
+			"inOutSine",
+			"inOutQuad",
+			"inOutCubic",
+			"inOutCirc",
+			"inOutQuart",
+			"inOutQuint",
+			"inOutExpo"
 		},
 		onchange = function()
 			HI = dlg.data.hueInterpolation
@@ -2300,10 +2321,23 @@ local function advancedSettings(windowBounds)
 			"Quad",
 			"Cubic",
 			"Circ",
+			"Quart",
+			"Quint",
+			"Expo",
 			"outSine",
 			"outQuad",
 			"outCubic",
-			"outCirc"
+			"outCirc",
+			"outQuart",
+			"outQuint",
+			"outExpo",
+			"inOutSine",
+			"inOutQuad",
+			"inOutCubic",
+			"inOutCirc",
+			"inOutQuart",
+			"inOutQuint",
+			"inOutExpo"
 		},
 		onchange = function()
 			SI = dlg.data.satInterpolation
@@ -2324,10 +2358,23 @@ local function advancedSettings(windowBounds)
 			"Quad",
 			"Cubic",
 			"Circ",
+			"Quart",
+			"Quint",
+			"Expo",
 			"outSine",
 			"outQuad",
 			"outCubic",
-			"outCirc"
+			"outCirc",
+			"outQuart",
+			"outQuint",
+			"outExpo",
+			"inOutSine",
+			"inOutQuad",
+			"inOutCubic",
+			"inOutCirc",
+			"inOutQuart",
+			"inOutQuint",
+			"inOutExpo"
 		},
 		onchange = function()
 			VI = dlg.data.valInterpolation
@@ -2347,10 +2394,23 @@ local function advancedSettings(windowBounds)
 			"Quad",
 			"Cubic",
 			"Circ",
+			"Quart",
+			"Quint",
+			"Expo",
 			"outSine",
 			"outQuad",
 			"outCubic",
-			"outCirc"
+			"outCirc",
+			"outQuart",
+			"outQuint",
+			"outExpo",
+			"inOutSine",
+			"inOutQuad",
+			"inOutCubic",
+			"inOutCirc",
+			"inOutQuart",
+			"inOutQuint",
+			"inOutExpo"
 		},
 		onchange = function()
 			AI = dlg.data.alphaInterpolation
@@ -2727,7 +2787,7 @@ local function reloadColors(windowBounds)
 	{
 		id=labelColorLeft,
 		label = "Base Colors",
-		text= "Left"
+		text= "Left/Sky/Bounce"
 	}
 	:label
 	{
@@ -2737,17 +2797,17 @@ local function reloadColors(windowBounds)
 	:label
 	{
 		id=labelColorRight,
-		text= "Right"
+		text= "Right/Sunlight"
 	}
 	:label
 	{
-		id=labelColorClipboard,
-		text= "Clipboard"
+		id=labelColorDarkestBlack,
+		text= "DarkestBlack"
 	}
 	:shades
 	{
 		id = "mainColors",
-		colors = {CL, CM, CR, CC},
+		colors = {CL, CM, CR, CBD},
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -2804,16 +2864,16 @@ local function reloadColors(windowBounds)
 	}
 	:button
 	{
-		id = "buttonSetClipboard",
+		id = "buttonSetDarkestBlack",
 		text = "Set",
 		onclick = function(ev)
 				local tempColor = Color{}
 				tempColor = app.fgColor
-				CC = Color{}
-				CC.red = tempColor.red
-				CC.green = tempColor.green
-				CC.blue = tempColor.blue
-				CC.alpha = tempColor.alpha
+				CBD = Color{}
+				CBD.red = tempColor.red
+				CBD.green = tempColor.green
+				CBD.blue = tempColor.blue
+				CBD.alpha = tempColor.alpha
 				reloadColors(dlg.bounds)
 				dlg:close()
 		end
@@ -2822,6 +2882,41 @@ local function reloadColors(windowBounds)
 	{
 		id = "separator",
 		text = "Color Control"
+	}
+	:button
+	{
+		id = "buttonColorSpaceOklab",
+		label = "Color Space",
+		text = colorSpaceOklab,
+		onclick = function()
+			if colorSpaceOklab == "OKLab" then
+				colorSpaceOklab = "*OKLab*"
+				colorSpaceRGB = "RGB"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			else
+				colorSpaceOklab = "OKLab"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonColorSpaceRGB",
+		text = colorSpaceRGB,
+		onclick = function()
+			if colorSpaceRGB == "RGB" then
+				colorSpaceRGB = "*RGB*"
+				colorSpaceOklab = "OKLab"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			else
+				colorSpaceRGB = "RGB"
+				reloadColors(dlg.bounds)
+				dlg:close()
+			end
+		end
 	}
 	:label
 	{
@@ -3303,7 +3398,7 @@ local function reloadColors(windowBounds)
 		onclick = function()
 			CL = colorLeft
 			CR = colorRight
-			CC = colorClipboard
+			CBD = colorBlackDarkest
 			AOC = amountOfColorsVar
 			AOSH = amountOfSoftHuesVar
 			AOH = amountOfHuesVar
