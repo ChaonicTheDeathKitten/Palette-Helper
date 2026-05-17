@@ -1477,8 +1477,6 @@ local easingCalculation =
 	inOutExpo = inOutExpo
 	}
 
-
-
 -- COLOR TABLE GENERATION
 
 
@@ -1516,11 +1514,12 @@ local function paletteShadeCalc()
 		tempColor.blue = hueInterpolationCalc(colorTableCalculation, CM.blue, CL.blue-CM.blue, 1)
 
 		-- Then comes the saturation interpolation. Standard here preserves the loss in saturation in linear RGB interpolation. Meanwhile linear interpolates the saturation of each endpoint.
-		local colorTableCalculation = CT[i]*(SS/100)
 		if SI == "Standard" then
 			tempColor.saturation = tempColor.saturation
 		else
-			tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, CL.saturation-CM.saturation, 1)
+			local baseSaturation = tempColor.saturation
+			local correctedSaturation = satInterpolationCalc(CT[i], CM.saturation, CL.saturation-CM.saturation, 1)
+			tempColor.saturation = satInterpolationCalc(SS/100, baseSaturation, correctedSaturation-baseSaturation, 1)
 		end
 		
 		-- Then comes the value interpolation.. I don't think I've ever tweaked this for my own colors, but someone might!
@@ -1558,7 +1557,9 @@ local function paletteShadeCalc()
 		if SI == "Standard" then
 			tempColor.saturation = tempColor.saturation
 		else
-			tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, CR.saturation-CM.saturation, 1)
+			local baseSaturation = tempColor.saturation
+			local correctedSaturation = satInterpolationCalc(CT[y+secondRound], CM.saturation, CR.saturation-CM.saturation, 1)
+			tempColor.saturation = satInterpolationCalc(SS/100, baseSaturation, correctedSaturation-baseSaturation, 1)
 		end
 		
 		-- Now comes the (useless) value calculation. Luckily, standard skips it. I really wonder if I should keep this... Or change the order of operation to before saturation??.. Who cares?!
