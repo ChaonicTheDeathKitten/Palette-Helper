@@ -1527,7 +1527,9 @@ local function paletteShadeCalc()
 		if VI == "Standard" then
 			tempColor.value = tempColor.value
 		else
-			tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CL.value-CM.value, 1)
+			local baseValue = tempColor.value
+			local correctedValue = valInterpolationCalc(CT[i], CM.value, CL.value-CM.value, 1)
+			tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
 		end
 		
 		-- Lastly, the Alpha channel is interpolated!
@@ -1567,7 +1569,9 @@ local function paletteShadeCalc()
 		if VI == "Standard" then
 			tempColor.value = tempColor.value
 		else
-			tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CR.value-CM.value, 1)
+			local baseValue = tempColor.value
+			local correctedValue = valInterpolationCalc(CT[y+secondRound], CM.value, CR.value-CM.value, 1)
+			tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
 		end
 		
 		-- Lastly we interpolate the alpha value!
