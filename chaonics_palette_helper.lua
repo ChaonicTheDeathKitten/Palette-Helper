@@ -82,8 +82,8 @@ local presetcustom4alphaInterpolationVar =		"Linear"
 
 -- ADVANCED SETTINGS VARIABLES
 
-local includeLeft = "Include Left Color"
-local includeRight = "Include Right Color"
+local includeLeft = "Include Left Extreme"
+local includeRight = "Include Right Extreme"
 local hasLeft = 0
 local hasRight = 0
 local copyColor = "*Copy Color*"
@@ -2721,13 +2721,13 @@ local function reloadColors(windowBounds)
 		id = "buttonIncludeLeft",
 		text = includeLeft,
 		onclick = function()
-			if includeLeft == "Include Left Color" then
-				includeLeft = "*Includes Left Color*"
+			if includeLeft == "Include Left Extreme" then
+				includeLeft = "*Includes Left Extreme*"
 				hasLeft = 1
 				reloadColors(dlg.bounds)
 				dlg:close()
 			else
-				includeLeft = "Include Left Color"
+				includeLeft = "Include Left Extreme"
 				hasLeft = 0
 				reloadColors(dlg.bounds)
 				dlg:close()
@@ -2739,13 +2739,13 @@ local function reloadColors(windowBounds)
 		id = "buttonIncludeRight",
 		text = includeRight,
 		onclick = function()
-			if includeRight == "Include Right Color" then
-				includeRight = "*Includes Right Color*"
+			if includeRight == "Include Right Extreme" then
+				includeRight = "*Includes Right Extreme*"
 				hasRight = 1
 				reloadColors(dlg.bounds)
 				dlg:close()
 			else
-				includeRight = "Include Right Color"
+				includeRight = "Include Right Extreme"
 				hasRight = 0
 				reloadColors(dlg.bounds)
 				dlg:close()
