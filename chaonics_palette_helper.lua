@@ -1572,12 +1572,20 @@ local function paletteShadeCalc()
 		end
 		-- Then comes the value interpolation.. I don't think I've ever tweaked this for my own colors, but someone might!
 		local colorTableCalculation = CT[i]*(VS/100)
-		if VI == "Standard" then
-			tempColor.value = tempColor.value
-		else
-			local baseValue = tempColor.value
-			local correctedValue = valInterpolationCalc(CT[i], CM.value, CL.value-CM.value, 1)
-			tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
+		if shadeBaseMainColor == "*Main Color*" then
+			if VI == "Standard" then
+				tempColor.value = tempColor.value
+			else
+				tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CL.value-CM.value, 1)
+			end
+		elseif shadeBaseStandard == "*Standard Interpolation*" then
+			if VI == "Standard" then
+				tempColor.value = tempColor.value
+			else
+				local baseValue = tempColor.value
+				local correctedValue = valInterpolationCalc(CT[i], CM.value, CL.value-CM.value, 1)
+				tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
+			end
 		end
 		
 		-- Lastly, the Alpha channel is interpolated!
@@ -1622,12 +1630,20 @@ local function paletteShadeCalc()
 		
 		-- Now comes the (useless) value calculation. Luckily, standard skips it. I really wonder if I should keep this... Or change the order of operation to before saturation??.. Who cares?!
 		local colorTableCalculation = CT[y+secondRound]*(VS/100)
-		if VI == "Standard" then
-			tempColor.value = tempColor.value
-		else
-			local baseValue = tempColor.value
-			local correctedValue = valInterpolationCalc(CT[y+secondRound], CM.value, CR.value-CM.value, 1)
-			tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
+		if shadeBaseMainColor == "*Main Color*" then
+			if VI == "Standard" then
+				tempColor.value = tempColor.value
+			else
+				tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CR.value-CM.value, 1)
+			end
+		elseif shadeBaseStandard == "*Standard Interpolation*" then
+			if VI == "Standard" then
+				tempColor.value = tempColor.value
+			else
+				local baseValue = tempColor.value
+				local correctedValue = valInterpolationCalc(CT[y+secondRound], CM.value, CR.value-CM.value, 1)
+				tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
+			end
 		end
 		
 		-- Lastly we interpolate the alpha value!
