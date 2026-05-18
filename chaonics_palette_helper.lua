@@ -108,7 +108,10 @@ colorMain.green = colorBrush.green
 colorMain.blue = colorBrush.blue
 colorMain.alpha = colorBrush.alpha
 local colorRight = Color{ r = 245, g = 245, b = 230, a = 255 }
+local colorClipboard = Color{ r = 0, g = 0, b = 0, a = 0 }
 local colorBlackDarkest = Color{ r = 0, g = 0, b = 0, a = 255 }
+local colorSkylight = Color{ r = 180, g = 255, b = 255, a = 255 }
+local colorSunlight = Color{ r = 251, g = 255, b = 230, a = 255 }
 local amountOfColorsVar = 9
 local amountOfHuesVar = 9
 local amountOfSoftHuesVar = 6
@@ -116,6 +119,8 @@ local hueStrength = 100
 local satStrength = 100
 local valStrength = 100
 local alphaStrength = 100
+local environmentalEnergy = 10
+local sunEnergy = 10
 local hueInterpolationVar = "Standard"
 local satInterpolationVar = "Standard"
 local valInterpolationVar = "Standard"
@@ -123,13 +128,18 @@ local alphaInterpolationVar = "Linear"
 local calcTable = {}
 local colorSpaceOklab = "*OKLab*"
 local colorSpaceRGB = "RGB"
+local shadeBaseMainColor = "*Main Color*"
+local shadeBaseStandard = "Standard Interpolation"
 
 -- CHANGED VALUES
 
 local CL = colorLeft
 local CM = colorMain
 local CR = colorRight
+local CB = colorClipboard
 local CBD = colorBlackDarkest
+local SkyL = colorSkylight
+local SunL = colorSunlight
 local AOC = amountOfColorsVar
 local AOH = amountOfHuesVar
 local AOSH = amountOfSoftHuesVar
@@ -137,6 +147,8 @@ local HS = hueStrength
 local SS = satStrength
 local VS = valStrength
 local AS = alphaStrength
+local EnvS = environmentalEnergy
+local SunS = sunEnergy
 local HI = hueInterpolationVar
 local SI = satInterpolationVar
 local VI = valInterpolationVar
@@ -1477,6 +1489,34 @@ local easingCalculation =
 	inOutExpo = inOutExpo
 	}
 
+-- RGB TO LINEAR sRGB
+
+-- Making use of behreajj's inverse transfer function to... get linear RGB.
+local function makeLinear(color)
+	return	ok_color.srgb_transfer_function_inv(color.red/255),
+			ok_color.srgb_transfer_function_inv(color.green/255),
+			ok_color.srgb_transfer_function_inv(color.blue/255)
+end
+
+-- Unmaking the linear RGB again, because it ptooey *spit spit*
+local function unmakeLinear(linearRed, linearGreen, linearBlue)
+	local red = ok_color.srgb_transfer_function(linearRed)
+	local green = ok_color.srgb_transfer_function(linearGreen)
+	local blue = ok_color.srgb_transfer_function(linearBlue)
+	-- I am today years old as I'm learning that lua doesn't have clamping... And neither can I find anything in the Aseprite API... =_=
+	-- Clamp red, green and blue
+	if red > 1 then red = 1 elseif red < 0 then red = 0 end
+	if green > 1 then green = 1 elseif green < 0 then green = 0 end
+	if blue > 1 then blue = 1 elseif blue < 0 then blue = 0 end
+	-- Then multiply with 255 to get normal RGB again
+	red = red * 255
+	green = green * 255
+	blue = blue * 255
+	-- Then return the values
+	return red, green, blue
+end
+
+
 -- COLOR TABLE GENERATION
 
 
@@ -1591,6 +1631,292 @@ local function paletteShadeCalc()
 	-- end
 	-- -- DEBUG END
 	return paletteShade
+end
+
+local function paletteEnvironmentalCalc()
+	paletteEnvironmental = {}
+	local copyColorAmount = AOC
+	local secondRound = 0
+	local hasCenter = false
+	
+	-- Just the hueInterpolation today!
+	local hueInterpolationCalc = easingCalculation[HI]
+	
+	-- If it has a center, remove and mark it
+	if copyColorAmount %2 == 1 then
+		copyColorAmount = copyColorAmount -1
+		hasCenter = true
+	end
+	
+	-- Halve the number and prepare the second round
+	copyColorAmount = copyColorAmount/2
+	secondRound = copyColorAmount
+	
+	-- Make the main color, environment, the sun, and darkest black linear *spits*
+	local CMlinearRed, CMlinearGreen, CMlinearBlue = makeLinear(CM)
+	local envLinearRed, envLinearGreen, envLinearBlue = makeLinear(SkyL)
+	local sunLinearRed, sunLinearGreen, sunLinearBlue = makeLinear(SunL)
+	local cbdLinearRed, cbdLinearGreen, cbdLinearBlue = makeLinear(CBD)
+	
+	-- Depending on how I want to scale this, I may need to change these numbers.. Today I chose this!
+	local envIntensity = EnvS / 10
+	local sunIntensity = SunS / 10
+	
+	-- Now the actual idea is to go from ambient occluded darkest black, then apply the environment lighting all the way to the max and then the sunlight.
+	-- This isn't.. a super accurate model, but it should work.. well enough... I should add some presets for different lighting environments later. Yes, nothing like making a todo note right heeeeere. Yep. Todo: Set some environment values and pack them into a neat array of buttons in the advanced settings. Mhhhh!
+	for i = 1, copyColorAmount do
+		local tempColor = Color{}
+		local colorTableCalculation = CT[i]*(HS/100)
+		local lightAmount = 1 - hueInterpolationCalc(colorTableCalculation, 0, 1, 1)
+		
+		-- Scaling the light...
+		local lightRed = envLinearRed * envIntensity * lightAmount
+		local lightGreen = envLinearGreen * envIntensity * lightAmount
+		local lightBlue = envLinearBlue * envIntensity * lightAmount
+		
+		-- Multiplying with the light
+		local linearRed = CMlinearRed * lightRed
+		local linearGreen = CMlinearGreen * lightGreen
+		local linearBlue = CMlinearBlue * lightBlue
+		
+		-- Make sure that it can not go any darker than the darkest black!
+		if linearRed < cbdLinearRed then linearRed = cbdLinearRed end
+		if linearGreen < cbdLinearGreen then linearGreen = cbdLinearGreen end
+		if linearBlue < cbdLinearBlue then linearBlue = cbdLinearBlue end
+		
+		-- Then unmake the linear magic again, transmuting it back into RGB!
+		tempColor.red, tempColor.green, tempColor.blue = unmakeLinear(linearRed, linearGreen, linearBlue)
+		
+		
+		tempColor.alpha = CM.alpha
+		
+		-- And save to palette!
+		table.insert(paletteEnvironmental, tempColor)
+	end
+	
+	-- If it has a center, just add CM lit by environment only (no sun yet)
+	if hasCenter == true then
+		local tempColor = Color{}
+		local linearRed = CMlinearRed * envLinearRed * envIntensity
+		local linearGreen = CMlinearGreen * envLinearGreen * envIntensity
+		local linearBlue = CMlinearBlue * envLinearBlue * envIntensity
+		if linearRed < cbdLinearRed then linearRed = cbdLinearRed end
+		if linearGreen < cbdLinearGreen then linearGreen = cbdLinearGreen end
+		if linearBlue < cbdLinearBlue then linearBlue = cbdLinearBlue end
+		tempColor.red, tempColor.green, tempColor.blue = unmakeLinear(linearRed, linearGreen, linearBlue)
+		tempColor.alpha = CM.alpha
+		table.insert(paletteEnvironmental, tempColor)
+		secondRound = secondRound + 1
+	end
+	
+	-- Now the lit side: from CM under environment only, ramping up to ambient + full sun
+	for y = 1, copyColorAmount do
+		local tempColor = Color{}
+		
+		local colorTableCalculation = CT[y+secondRound]*(HS/100)
+		local sunAmount = hueInterpolationCalc(colorTableCalculation, 0, 1, 1)
+		
+		-- Total light = full environment + sun ramping up
+		local lightRed = envLinearRed * envIntensity + sunLinearRed * sunIntensity * sunAmount
+		local lightGreen = envLinearGreen * envIntensity + sunLinearGreen * sunIntensity * sunAmount
+		local lightBlue = envLinearBlue * envIntensity + sunLinearBlue * sunIntensity * sunAmount
+		
+		-- Same diffuse model: surface * light
+		local linearRed = CMlinearRed * lightRed
+		local linearGreen = CMlinearGreen * lightGreen
+		local linearBlue = CMlinearBlue * lightBlue
+		
+		-- Shadow floor still applies, even though it'll rarely catch anything on this side
+		if linearRed < cbdLinearRed then linearRed = cbdLinearRed end
+		if linearGreen < cbdLinearGreen then linearGreen = cbdLinearGreen end
+		if linearBlue < cbdLinearBlue then linearBlue = cbdLinearBlue end
+		
+		-- Then unmake the linear magic again, transmuting it back into RGB!
+		tempColor.red, tempColor.green, tempColor.blue = unmakeLinear(linearRed, linearGreen, linearBlue)
+		
+		-- Look, you don't want alpha to work here. You'd be embarrassing yourself.
+		tempColor.alpha = 255
+		
+		-- And save to palette!
+		table.insert(paletteEnvironmental, tempColor)
+	end
+	
+	return paletteEnvironmental
+end
+
+local function paletteAdditiveCalc()
+	paletteAdditive = {}
+	local copyColorAmount = AOC
+	local secondRound = 0
+	local hasCenter = false
+	
+	-- This one needs both hue and alpha interpolations!
+	local hueInterpolationCalc = easingCalculation[HI]
+	local alphaInterpolationCalc = easingCalculation[AI]
+	
+	-- If it has a center, remove and mark it
+	if copyColorAmount %2 == 1 then
+		copyColorAmount = copyColorAmount -1
+		hasCenter = true
+	end
+	
+	-- Halve the number and prepare the second round
+	copyColorAmount = copyColorAmount/2
+	secondRound = copyColorAmount
+	
+	-- Convert the RGB values of Left, Main and Right colors to linear RGB
+	-- This tech to assign values to three separate variables is insane!
+    local CLlinearRed, CLlinearGreen, CLlinearBlue = makeLinear(CL)
+	local CMlinearRed, CMlinearGreen, CMlinearBlue = makeLinear(CM)
+    local CRlinearRed, CRlinearGreen, CRlinearBlue = makeLinear(CR)
+	
+	-- Here we go creating new tables again in 2026! Thank you, past self for figuring this out!
+	-- Starting with left color to main color
+	for i = 1, copyColorAmount do
+		local tempColor = Color{}
+		
+		-- Not to forget this thing to make the calculation look a lot less.. threatening. Man, I could really have called that variable t instead and it would be shorter. But I worry that I won't be able to read this in the future again until I dig way into stuff.
+		local colorTableCalculation = CT[i]*(HS/100)
+		local linearRed = hueInterpolationCalc(colorTableCalculation, CMlinearRed, CLlinearRed - CMlinearRed, 1)
+		local linearGreen = hueInterpolationCalc(colorTableCalculation, CMlinearGreen, CLlinearGreen - CMlinearGreen, 1)
+		local linearBlue = hueInterpolationCalc(colorTableCalculation, CMlinearBlue, CLlinearBlue - CMlinearBlue, 1)
+		-- Then unmake the linear magic again, transmuting it back into RGB!
+		tempColor.red, tempColor.green, tempColor.blue = unmakeLinear(linearRed, linearGreen, linearBlue)
+		
+		-- Lastly, the Alpha channel is interpolated, but in normal RGB!
+		local colorTableCalculation = CT[i]*(AS/100)
+		tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CL.alpha-CM.alpha, 1)
+		
+		-- And save to palette!
+		table.insert(paletteAdditive, tempColor)
+	end
+	
+	-- If it has a center, just add the main color in the middle
+	if hasCenter == true then
+		table.insert(paletteAdditive, CM)
+		secondRound = secondRound + 1
+	end
+	
+	-- Lastly, main color to right color
+	for y = 1, copyColorAmount do
+		local tempColor = Color{}
+		
+		-- To future me. Answer this honestly. Do you still feel like everything you're doing is vastly above your actual skill level? Don't get too comfortable on me!
+		-- The first half is already complex enough, but something about the second round makes my brain turn 180° inside my skull
+		local colorTableCalculation = CT[y+secondRound]*(HS/100)
+		local linearRed = hueInterpolationCalc(colorTableCalculation, CMlinearRed, CRlinearRed - CMlinearRed, 1)
+		local linearGreen = hueInterpolationCalc(colorTableCalculation, CMlinearGreen, CRlinearGreen - CMlinearGreen, 1)
+		local linearBlue = hueInterpolationCalc(colorTableCalculation, CMlinearBlue, CRlinearBlue - CMlinearBlue, 1)
+		
+		-- Then unmake the linear magic again, transmuting it back into RGB!
+		tempColor.red, tempColor.green, tempColor.blue = unmakeLinear(linearRed, linearGreen, linearBlue)
+		
+		-- Lastly, the Alpha channel is interpolated, but in normal RGB!
+		local colorTableCalculation = CT[y+secondRound]*(AS/100)
+		tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CR.alpha-CM.alpha, 1)
+		
+		-- And save to palette!
+		table.insert(paletteAdditive, tempColor)
+	end
+	
+	-- And then it ends my suffering. What am I even complaining, this only took a couple of hours!.. I swear if I was paid an hourly wage~
+	return paletteAdditive
+end
+
+local function paletteSubtractiveCalc()
+	paletteSubtractive = {}
+	local copyColorAmount = AOC
+	local secondRound = 0
+	local hasCenter = false
+	
+	-- This one needs both hue and alpha interpolations!
+	local hueInterpolationCalc = easingCalculation[HI]
+	local alphaInterpolationCalc = easingCalculation[AI]
+	
+	-- If it has a center, remove and mark it
+	if copyColorAmount %2 == 1 then
+		copyColorAmount = copyColorAmount -1
+		hasCenter = true
+	end
+	
+	-- Halve the number and prepare the second round
+	copyColorAmount = copyColorAmount/2
+	secondRound = copyColorAmount
+	
+	-- When going into this, I didn't imagine that I had to worry about zero to the power of zero doing weird sh**.
+	local epsilon <const> = 1e-6
+	local function makeNotZero(x)
+		if x < epsilon then
+			return epsilon
+		else
+			return x
+		end
+	end
+	
+	-- Convert the RGB values of Left, Main and Right colors to linear RGB
+	-- This tech to assign values to three separate variables is insane!
+    local CLlinearRed, CLlinearGreen, CLlinearBlue = makeLinear(CL)
+	local CMlinearRed, CMlinearGreen, CMlinearBlue = makeLinear(CM)
+    local CRlinearRed, CRlinearGreen, CRlinearBlue = makeLinear(CR)
+	-- And this time around, I'm also going to make sure that the values are at least epsilon!
+	-- This feels like a superpower, applying so many variables to the results of three functions!
+	CLlinearRed, CLlinearGreen, CLlinearBlue = makeNotZero(CLlinearRed), makeNotZero(CLlinearGreen), makeNotZero(CLlinearBlue)
+	CMlinearRed, CMlinearGreen, CMlinearBlue = makeNotZero(CMlinearRed), makeNotZero(CMlinearGreen), makeNotZero(CMlinearBlue)
+	CRlinearRed, CRlinearGreen, CRlinearBlue = makeNotZero(CRlinearRed), makeNotZero(CRlinearGreen), makeNotZero(CRlinearBlue)
+	
+	-- Here we go creating new tables again in 2026! Thank you, past self for figuring this out!
+	-- Starting with left color to main color
+	for i = 1, copyColorAmount do
+		local tempColor = Color{}
+		
+		-- I think that the math checks out, but the resulting colors feel off.. I shall simply.. Trust that it is correct?
+		-- It's not like there's a thousand other tools that I can look at, which are doing this and are written in lua and open source...
+		local colorTableCalculation = CT[i]*(HS/100)
+		local precalcEasing = hueInterpolationCalc(colorTableCalculation, 0, 1, 1)
+		local linearRed = (CMlinearRed ^ (1 - precalcEasing)) * (CLlinearRed ^ precalcEasing)
+		local linearGreen = (CMlinearGreen ^ (1 - precalcEasing)) * (CLlinearGreen ^ precalcEasing)
+		local linearBlue = (CMlinearBlue ^ (1 - precalcEasing)) * (CLlinearBlue ^ precalcEasing)
+		-- Then unmake the linear magic again, transmuting it back into RGB!
+		tempColor.red, tempColor.green, tempColor.blue = unmakeLinear(linearRed, linearGreen, linearBlue)
+		
+		-- Lastly, the Alpha channel is interpolated, but in normal RGB!
+		local colorTableCalculation = CT[i]*(AS/100)
+		tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CL.alpha-CM.alpha, 1)
+		
+		-- And save to palette!
+		table.insert(paletteSubtractive, tempColor)
+	end
+	
+	-- If it has a center, just add the main color in the middle
+	if hasCenter == true then
+		table.insert(paletteSubtractive, CM)
+		secondRound = secondRound + 1
+	end
+	
+	-- Lastly, main color to right color
+	for y = 1, copyColorAmount do
+		local tempColor = Color{}
+		
+		-- I'm just.. Done..
+		local colorTableCalculation = CT[y+secondRound]*(HS/100)
+		local precalcEasing = hueInterpolationCalc(colorTableCalculation, 0, 1, 1)
+		local linearRed = (CMlinearRed ^ (1 - precalcEasing)) * (CRlinearRed ^ precalcEasing)
+		local linearGreen = (CMlinearGreen ^ (1 - precalcEasing)) * (CRlinearGreen ^ precalcEasing)
+		local linearBlue = (CMlinearBlue ^ (1 - precalcEasing)) * (CRlinearBlue ^ precalcEasing)
+		
+		-- Then unmake the linear magic again, transmuting it back into RGB!
+		tempColor.red, tempColor.green, tempColor.blue = unmakeLinear(linearRed, linearGreen, linearBlue)
+		
+		-- Lastly, the Alpha channel is interpolated, but in normal RGB!
+		local colorTableCalculation = CT[y+secondRound]*(AS/100)
+		tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CR.alpha-CM.alpha, 1)
+		
+		-- And save to palette!
+		table.insert(paletteSubtractive, tempColor)
+	end
+	
+	-- And then it ends my suffering. What am I even complaining, this only took a couple of hours!.. I swear if I was paid an hourly wage~
+	return paletteSubtractive
 end
 
 
@@ -1886,6 +2212,88 @@ local function advancedSettings(windowBounds)
 		id = "separator",
 		text = "Advanced Color Control"
 	}
+	:button
+	{
+		id = "buttonColorSpaceOklab",
+		label = "Color Space",
+		text = colorSpaceOklab,
+		onclick = function()
+			if colorSpaceOklab == "OKLab" then
+				colorSpaceOklab = "*OKLab*"
+				colorSpaceRGB = "RGB"
+				advancedSettings(dlg.bounds)
+				reloadColorWindow()
+				dlg:close()
+			else
+				colorSpaceOklab = "OKLab"
+				colorSpaceRGB = "*RGB*"
+				advancedSettings(dlg.bounds)
+				reloadColorWindow()
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonColorSpaceRGB",
+		text = colorSpaceRGB,
+		onclick = function()
+			if colorSpaceRGB == "RGB" then
+				colorSpaceRGB = "*RGB*"
+				colorSpaceOklab = "OKLab"
+				advancedSettings(dlg.bounds)
+				reloadColorWindow()
+				dlg:close()
+			else
+				colorSpaceRGB = "RGB"
+				colorSpaceOklab = "*OKLab*"
+				advancedSettings(dlg.bounds)
+				reloadColorWindow()
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonShadeBaseMainColor",
+		label = "Base Shade",
+		text = shadeBaseMainColor,
+		onclick = function()
+			if shadeBaseMainColor == "Main Color" then
+				shadeBaseMainColor = "*Main Color*"
+				shadeBaseStandard = "Standard Interpolation"
+				advancedSettings(dlg.bounds)
+				reloadColorWindow()
+				dlg:close()
+			else
+				shadeBaseMainColor = "Main Color"
+				shadeBaseStandard = "*Standard Interpolation*"
+				advancedSettings(dlg.bounds)
+				reloadColorWindow()
+				dlg:close()
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonShadeBaseStandard",
+		text = shadeBaseStandard,
+		onclick = function()
+			if shadeBaseStandard == "Standard Interpolation" then
+				shadeBaseStandard = "*Standard Interpolation*"
+				shadeBaseMainColor = "Main Color"
+				advancedSettings(dlg.bounds)
+				reloadColorWindow()
+				dlg:close()
+			else
+				shadeBaseStandard = "Standard Interpolation"
+				shadeBaseMainColor = "*Main Color*"
+				advancedSettings(dlg.bounds)
+				reloadColorWindow()
+				dlg:close()
+			end
+		end
+	}
 	:label
 	{
 		id = labelStrengthHue,
@@ -1967,6 +2375,49 @@ local function advancedSettings(windowBounds)
 		end,
 		onrelease=function()
 			AS = dlg.data.alphaStrengthSlider
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+			end
+	}
+	:label
+	{
+		id=labelEnvironmentalEnergy,
+		label = "",
+		text= "Environmental Energy"
+	}
+	:label
+	{
+		id=labelSunEnergy,
+		text= "Sun Energy"
+	}
+	:slider
+	{
+		id = "EnvironmentalSlider",
+		min=0,
+		max=100,
+		value=EnvS,
+		onchange=function()
+			EnvS = dlg.data.EnvironmentalSlider
+		end,
+		onrelease=function()
+			EnvS = dlg.data.EnvironmentalSlider
+			advancedSettings(dlg.bounds)
+			reloadColorWindow()
+			dlg:close()
+			end
+	}
+	:slider
+	{
+		id = "SunSlider",
+		min=0,
+		max=100,
+		value=SunS,
+		onchange=function()
+			SunS = dlg.data.SunSlider
+		end,
+		onrelease=function()
+			SunS = dlg.data.SunSlider
 			advancedSettings(dlg.bounds)
 			reloadColorWindow()
 			dlg:close()
@@ -2507,7 +2958,7 @@ local function reloadColors(windowBounds)
 	{
 		id=labelColorLeft,
 		label = "Base Colors",
-		text= "Left/Sky/Bounce"
+		text= "Left"
 	}
 	:label
 	{
@@ -2517,17 +2968,17 @@ local function reloadColors(windowBounds)
 	:label
 	{
 		id=labelColorRight,
-		text= "Right/Sunlight"
+		text= "Right"
 	}
 	:label
 	{
-		id=labelColorDarkestBlack,
-		text= "DarkestBlack"
+		id=labelClipboard,
+		text= "Clipboard"
 	}
 	:shades
 	{
 		id = "mainColors",
-		colors = {CL, CM, CR, CBD},
+		colors = {CL, CM, CR, CB},
 		onclick = function(ev)
 			if (ev.button == MouseButton.LEFT) then
 				app.fgColor = ev.color
@@ -2584,9 +3035,51 @@ local function reloadColors(windowBounds)
 	}
 	:button
 	{
-		id = "buttonSetDarkestBlack",
+		id = "buttonSetClipboard",
 		text = "Set",
 		onclick = function(ev)
+				local tempColor = Color{}
+				tempColor = app.fgColor
+				CB = Color{}
+				CB.red = tempColor.red
+				CB.green = tempColor.green
+				CB.blue = tempColor.blue
+				CB.alpha = tempColor.alpha
+				reloadColors(dlg.bounds)
+				dlg:close()
+		end
+	}
+	:label
+	{
+		id=labelEnvironmentalColors,
+		label = "Env. Colors",
+		text= "DarkestBlack"
+	}
+	:label
+	{
+		id=labelSkylight,
+		text= "Skylight"
+	}
+	:label
+	{
+		id=labelSunlight,
+		text= "Sunlight"
+	}
+	:shades
+	{
+		id = "mainColors",
+		colors = {CBD, SkyL, SunL},
+		onclick = function(ev)
+			if (ev.button == MouseButton.LEFT) then
+				app.fgColor = ev.color
+			end
+		end
+	}
+	:button
+	{
+		id = "buttonSetBlack",
+		text = "Set",
+		onclick = function()
 				local tempColor = Color{}
 				tempColor = app.fgColor
 				CBD = Color{}
@@ -2598,45 +3091,42 @@ local function reloadColors(windowBounds)
 				dlg:close()
 		end
 	}
+	:button
+	{
+		id = "buttonSetSkylight",
+		text = "Set",
+		onclick = function()
+				local tempColor = Color{}
+				tempColor = app.fgColor
+				SkyL = Color{}
+				SkyL.red = tempColor.red
+				SkyL.green = tempColor.green
+				SkyL.blue = tempColor.blue
+				SkyL.alpha = tempColor.alpha
+				reloadColors(dlg.bounds)
+				dlg:close()
+		end
+	}
+	:button
+	{
+		id = "buttonSetSunlight",
+		text = "Set",
+		onclick = function(ev)
+				local tempColor = Color{}
+				tempColor = app.fgColor
+				SunL = Color{}
+				SunL.red = tempColor.red
+				SunL.green = tempColor.green
+				SunL.blue = tempColor.blue
+				SunL.alpha = tempColor.alpha
+				reloadColors(dlg.bounds)
+				dlg:close()
+		end
+	}
 	:separator
 	{
 		id = "separator",
 		text = "Color Control"
-	}
-	:button
-	{
-		id = "buttonColorSpaceOklab",
-		label = "Color Space",
-		text = colorSpaceOklab,
-		onclick = function()
-			if colorSpaceOklab == "OKLab" then
-				colorSpaceOklab = "*OKLab*"
-				colorSpaceRGB = "RGB"
-				reloadColors(dlg.bounds)
-				dlg:close()
-			else
-				colorSpaceOklab = "OKLab"
-				reloadColors(dlg.bounds)
-				dlg:close()
-			end
-		end
-	}
-	:button
-	{
-		id = "buttonColorSpaceRGB",
-		text = colorSpaceRGB,
-		onclick = function()
-			if colorSpaceRGB == "RGB" then
-				colorSpaceRGB = "*RGB*"
-				colorSpaceOklab = "OKLab"
-				reloadColors(dlg.bounds)
-				dlg:close()
-			else
-				colorSpaceRGB = "RGB"
-				reloadColors(dlg.bounds)
-				dlg:close()
-			end
-		end
 	}
 	:label
 	{
@@ -2829,6 +3319,7 @@ local function reloadColors(windowBounds)
 			end
 		end
 	}
+-- SHADE
 	:shades
 	{
 		id = "paletteShade",
@@ -2876,6 +3367,150 @@ local function reloadColors(windowBounds)
 		end
 	}
 -- SHADE END
+-- ENVIRONMENTAL
+	:shades
+	{
+		id = "paletteEnvironmental",
+		label = "Environmental",
+		colors = paletteEnvironmentalCalc(),
+		onclick =
+		function(ev)
+			local saveToPalette = Color{}
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
+				app.fgColor = ev.color
+			elseif (ev.button == MouseButton.RIGHT) and copyColor == "*Copy Color*" then
+				app.bgColor = ev.color
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
+				app.command.AddColor
+					{
+						color = ev.color
+					}
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
+				for i = 1, AOC do
+					local saveToPalette = paletteEnvironmental[i]
+					app.command.AddColor
+						{
+							color = saveToPalette
+						}
+			end
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Gen. Palette*" then
+				for y = 1, AOH do
+					for i = 1, AOC do
+						local saveToPalette = paletteEnvironmental[i]
+						app.command.AddColor
+							{
+								color = saveToPalette
+							}
+					end
+					local wrap = 0
+					if y + 1 > AOH then
+						wrap = AOH
+					end
+					CM = paletteHue[y+1-wrap]
+					paletteEnvironmentalCalc()
+				end
+			end
+		end
+	}
+-- ENVIRONMENTAL END
+-- ADDITIVE
+	:shades
+	{
+		id = "paletteAdditive",
+		label = "Additive",
+		colors = paletteAdditiveCalc(),
+		onclick =
+		function(ev)
+			local saveToPalette = Color{}
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
+				app.fgColor = ev.color
+			elseif (ev.button == MouseButton.RIGHT) and copyColor == "*Copy Color*" then
+				app.bgColor = ev.color
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
+				app.command.AddColor
+					{
+						color = ev.color
+					}
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
+				for i = 1, AOC do
+					local saveToPalette = paletteAdditive[i]
+					app.command.AddColor
+						{
+							color = saveToPalette
+						}
+			end
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Gen. Palette*" then
+				for y = 1, AOH do
+					for i = 1, AOC do
+						local saveToPalette = paletteShade[i]
+						app.command.AddColor
+							{
+								color = saveToPalette
+							}
+					end
+					local wrap = 0
+					if y + 1 > AOH then
+						wrap = AOH
+					end
+					CM = paletteHue[y+1-wrap]
+					paletteAdditiveCalc()
+				end
+			end
+		end
+	}
+-- ADDITIVE END
+-- SUBTRACTIVE
+	:shades
+	{
+		id = "paletteSubtractive",
+		label = "Subtractive",
+		colors = paletteSubtractiveCalc(),
+		onclick =
+		function(ev)
+			local saveToPalette = Color{}
+			if (ev.button == MouseButton.LEFT) and copyColor == "*Copy Color*" then
+				app.fgColor = ev.color
+			elseif (ev.button == MouseButton.RIGHT) and copyColor == "*Copy Color*" then
+				app.bgColor = ev.color
+			elseif (ev.button == MouseButton.LEFT) and saveColor == "*Save Color*" then
+				for i = 1, AOSH do
+				app.command.AddColor
+					{
+						color = ev.color
+					}
+				end
+			elseif (ev.button == MouseButton.LEFT) and saveLine == "*Save Line*" then
+				for i = 1, AOC do
+					local saveToPalette = paletteSubtractive[i]
+					app.command.AddColor
+						{
+							color = saveToPalette
+						}
+			end
+			elseif (ev.button == MouseButton.LEFT) and savePalette == "*Gen. Palette*" then
+				for y = 1, AOH do
+					for i = 1, AOC do
+						local saveToPalette = paletteSubtractive[i]
+						app.command.AddColor
+							{
+								color = saveToPalette
+							}
+					end
+					local wrap = 0
+					if y + 1 > AOH then
+						wrap = AOH
+					end
+					CM = paletteHue[y+1-wrap]
+					paletteSubtractiveCalc()
+				end
+			end
+		end
+	}
+-- SUBTRACTIVE END
 -- LIGHT
 	:shades
 	{
@@ -3118,7 +3753,10 @@ local function reloadColors(windowBounds)
 		onclick = function()
 			CL = colorLeft
 			CR = colorRight
+			CB = colorClipboard
 			CBD = colorBlackDarkest
+			SkyL = colorSkylight
+			SunL = colorSunlight
 			AOC = amountOfColorsVar
 			AOSH = amountOfSoftHuesVar
 			AOH = amountOfHuesVar
