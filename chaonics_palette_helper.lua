@@ -2153,31 +2153,73 @@ local function paletteHueCalc()
 	
 	-- This one only needs a hue easing calculation
 	local hueInterpolationCalc = easingCalculation[HI]
-
-	for i = 1, AOH do
-		local tempColor = Color{}
-		tempColor.red = CM.red
-		tempColor.green = CM.green
-		tempColor.blue = CM.blue
-		tempColor.alpha = CM.alpha
-		-- print (tempColor.hue)
+	
+	
+	if colorSpaceOklab == "*OKLab*" then
+		-- Okay so I've tried using OkHSV, and OkHSL just seems better. It's a drop in replacement as far as I can tell. Literally just one letter off
+		local okHue, okSat, okVal = ok_color.srgb_to_okhsl(CM.red/255, CM.green/255, CM.blue/255)
 		
-		-- Ooooh! This magic looks more advanced!... But is it? *insert VSauce sounds* (I REALLY need to take this more seriously)
-		local colorTableCalculation = (1/AOH)*(i-1)
-		if HI == "Standard" or interpolateHardHue == "No" then
-			tempColor.hue = linear(colorTableCalculation, CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
+		for i = 1, AOH do
+			local tempColor = Color{}
+			
+			-- Create an offset from the original value
+			local colorTableCalculation = (1/AOH)*(i-1)
+			local hueOffset = 0
+			if HI == "Standard" or interpolateHardHue == "No" then
+				hueOffset = linear(colorTableCalculation, 0, 1, 1)
+			else
+				hueOffset = hueInterpolationCalc(colorTableCalculation, 0, 1, 1)
 			end
-		else
-			tempColor.hue = hueInterpolationCalc(colorTableCalculation, CM.hue, 360, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
+			
+			-- Then add it on top and as long as it's above or equal to 1, subtract 1. We don't do whole numbers here in float land!
+			local newHue = okHue + hueOffset
+			while newHue >= 1 do
+				newHue = newHue - 1
 			end
+			
+			-- Create new linear sRGB color with the new hue!
+			-- As I've said up there already, this isn't really HSV, it's using lightness, but the hue is nicer in OkHSL, don't know what that's about..
+			local red, green, blue = ok_color.okhsl_to_srgb(newHue, okSat, okVal)
+			
+			-- Clamp inbetween 0 and 1 to make it fit into... *math sounds*... *giving up sounds from tiredness and delirium*
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			
+			-- Now just paste the new values into the tempColor!
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			tempColor.alpha = CM.alpha
+			
+			table.insert(paletteHue, tempColor)
 		end
-		
-		-- print (tempColor.hue)
-		table.insert(paletteHue, tempColor)
+	elseif colorSpaceRGB == "*RGB*" then
+		for i = 1, AOH do
+			local tempColor = Color{}
+			tempColor.red = CM.red
+			tempColor.green = CM.green
+			tempColor.blue = CM.blue
+			tempColor.alpha = CM.alpha
+			-- print (tempColor.hue)
+			
+			-- Ooooh! This magic looks more advanced!... But is it? *insert VSauce sounds* (I REALLY need to take this more seriously)
+			local colorTableCalculation = (1/AOH)*(i-1)
+			if HI == "Standard" or interpolateHardHue == "No" then
+				tempColor.hue = linear(colorTableCalculation, CM.hue, 360, 1)
+				while tempColor.hue >= 360 do
+					tempColor.hue = tempColor.hue - 360
+				end
+			else
+				tempColor.hue = hueInterpolationCalc(colorTableCalculation, CM.hue, 360, 1)
+				while tempColor.hue >= 360 do
+					tempColor.hue = tempColor.hue - 360
+				end
+			end
+			
+			-- print (tempColor.hue)
+			table.insert(paletteHue, tempColor)
+		end
 	end
 	-- -- DEBUG
 	-- for k,v in pairs(paletteHue) do
