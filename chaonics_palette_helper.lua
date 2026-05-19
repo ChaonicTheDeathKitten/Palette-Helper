@@ -1,84 +1,10 @@
 -- Chaonic's Palette Helper
 
--- YOU CAN MAKE CHANGES HERE UNTIL I SAY STOP
-
 -- I WOULDN'T GO LOWER THAN 3, BUT GO NUTS
+-- The main color is only included when the number of colors you choose is uneven.
 local minColors = 3
 local maxColors = 32
 
--- YOUR CUSTOM PRESETS - IF YOU WANT TO GIVE THOSE A TRY!!!
-
--- PRESET CUSTOM 1
-
-local presetcustom1name =						"Custom 1"
-local presetcustom1colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
-local presetcustom1colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
-local presetcustom1amountOfColorsVar =			9
-local presetcustom1amountOfHuesVar =			9
-local presetcustom1amountOfSoftHuesVar =		6
-local presetcustom1hueStrength =				100
-local presetcustom1satStrength =				100
-local presetcustom1valStrength =				100
-local presetcustom1alphaStrength =				100
-local presetcustom1hueInterpolationVar =		"Standard"
-local presetcustom1satInterpolationVar =		"Sine"
-local presetcustom1valInterpolationVar =		"Standard"
-local presetcustom1alphaInterpolationVar =		"Linear"
-
--- PRESET CUSTOM 2
-
-local presetcustom2name =						"Custom 2"
-local presetcustom2colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
-local presetcustom2colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
-local presetcustom2amountOfColorsVar =			9
-local presetcustom2amountOfHuesVar =			9
-local presetcustom2amountOfSoftHuesVar =		6
-local presetcustom2hueStrength =				100
-local presetcustom2satStrength =				100
-local presetcustom2valStrength =				100
-local presetcustom2alphaStrength =				100
-local presetcustom2hueInterpolationVar =		"Standard"
-local presetcustom2satInterpolationVar =		"Sine"
-local presetcustom2valInterpolationVar =		"Standard"
-local presetcustom2alphaInterpolationVar =		"Linear"
-
--- PRESET CUSTOM 3
-
-local presetcustom3name =						"Custom 3"
-local presetcustom3colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
-local presetcustom3colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
-local presetcustom3amountOfColorsVar =			9
-local presetcustom3amountOfHuesVar =			9
-local presetcustom3amountOfSoftHuesVar =		6
-local presetcustom3hueStrength =				100
-local presetcustom3satStrength =				100
-local presetcustom3valStrength =				100
-local presetcustom3alphaStrength =				100
-local presetcustom3hueInterpolationVar =		"Standard"
-local presetcustom3satInterpolationVar =		"Sine"
-local presetcustom3valInterpolationVar =		"Standard"
-local presetcustom3alphaInterpolationVar =		"Linear"
-
--- PRESET CUSTOM 4
-
-local presetcustom4name =						"Custom 4"
-local presetcustom4colorLeft =					Color{ r = 0, g = 0, b = 0, a = 255 }
-local presetcustom4colorRight =					Color{ r = 255, g = 255, b = 255, a = 255 }
-local presetcustom4amountOfColorsVar =			9
-local presetcustom4amountOfHuesVar =			9
-local presetcustom4amountOfSoftHuesVar =		6
-local presetcustom4hueStrength =				100
-local presetcustom4satStrength =				100
-local presetcustom4valStrength =				100
-local presetcustom4alphaStrength =				100
-local presetcustom4hueInterpolationVar =		"Standard"
-local presetcustom4satInterpolationVar =		"Sine"
-local presetcustom4valInterpolationVar =		"Standard"
-local presetcustom4alphaInterpolationVar =		"Linear"
-
--- STOP MAKING CHANGES HERE (UNLESS YOU KNOW WHAT YOU ARE DOING)
-
--- WAIT FUNCTION
 
 -- ADVANCED SETTINGS VARIABLES
 
@@ -114,7 +40,7 @@ local colorSkylight = Color{ r = 180, g = 255, b = 255, a = 255 }
 local colorSunlight = Color{ r = 251, g = 255, b = 230, a = 255 }
 local amountOfColorsVar = 9
 local amountOfHuesVar = 9
-local amountOfSoftHuesVar = 6
+local amountOfSoftHuesVar = 9
 local hueStrength = 100
 local satStrength = 100
 local valStrength = 100
@@ -2232,39 +2158,134 @@ end
 
 local function paletteSoftHueCalc()
 	paletteSoftHue = {}
+	local copyColorAmount = AOSH
+	local secondRound = 0
+	local hasCenter = false
 	
 	-- This one only needs a hue easing calculation
 	local hueInterpolationCalc = easingCalculation[HI]
-
-	for i = 1, AOSH do
-		local tempColor = Color{}
-		tempColor.red = CM.red
-		tempColor.green = CM.green
-		tempColor.blue = CM.blue
-		tempColor.alpha = CM.alpha
-		-- print (tempColor.hue)
-		
-		-- Here comes the last time for the easing magic!
-		local colorTableCalculation = (1/AOSH)*(i-1)
-		if HI == "Standard" or interpolateSoftHue == "No" then
-			tempColor.hue = linear(colorTableCalculation, CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		else
-			tempColor.hue = hueInterpolationCalc(colorTableCalculation, CM.hue, 360/AOH, 1)
-			while tempColor.hue >= 360 do
-				tempColor.hue = tempColor.hue - 360
-			end
-		end
-		-- print (tempColor.hue)
-		table.insert(paletteSoftHue, tempColor)
+	
+	-- If it has a center, remove and mark it
+	if copyColorAmount %2 == 1 then
+		copyColorAmount = copyColorAmount -1
+		hasCenter = true
 	end
-	-- -- DEBUG
-	-- for k,v in pairs(paletteHue) do
-	-- print(v)  
-	-- end
-	-- -- DEBUG END
+	
+	-- Halve the number and prepare the second round
+	copyColorAmount = copyColorAmount/2
+	secondRound = copyColorAmount
+	
+	if colorSpaceOklab == "*OKLab*" then
+		local okHue, okSat, okLig = ok_color.srgb_to_okhsl(CM.red/255, CM.green/255, CM.blue/255)
+		
+		for i = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			local colorTableCalculation = (1/copyColorAmount)*(copyColorAmount - i + 1)
+			local hueOffset = 0
+			if interpolateSoftHue == "No" or HI == "Standard" then
+				hueOffset = linear(colorTableCalculation, 0, 1, 1)
+			else
+				hueOffset = hueInterpolationCalc(colorTableCalculation, 0, 1, 1)
+			end
+			
+			hueOffset = -hueOffset * (1/AOH)
+			
+			local newHue = okHue + hueOffset
+			while newHue < 0 do newHue = newHue + 1 end
+			while newHue >= 1 do newHue = newHue - 1 end
+			
+			local red, green, blue = ok_color.okhsl_to_srgb(newHue, okSat, okLig)
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			tempColor.alpha = CM.alpha
+			
+			table.insert(paletteSoftHue, tempColor)
+		end
+		
+		-- If it has a center, bla bla bla. I should stop commenting so much on the same stuff over and over again when it adds nothing to understanding the code
+		if hasCenter == true then
+			table.insert(paletteSoftHue, CM)
+			secondRound = secondRound + 1
+		end
+		
+		for y = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			local colorTableCalculation = (1/copyColorAmount)*y
+			local hueOffset = 0
+			if interpolateSoftHue == "No" or HI == "Standard" then
+				hueOffset = linear(colorTableCalculation, 0, 1, 1)
+			else
+				hueOffset = hueInterpolationCalc(colorTableCalculation, 0, 1, 1)
+			end
+			
+			hueOffset = hueOffset * (1/AOH)
+			
+			local newHue = okHue + hueOffset
+			while newHue >= 1 do newHue = newHue - 1 end
+			
+			local red, green, blue = ok_color.okhsl_to_srgb(newHue, okSat, okLig)
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			tempColor.alpha = CM.alpha
+			
+			table.insert(paletteSoftHue, tempColor)
+		end
+	elseif colorSpaceRGB == "*RGB*" then
+		for i = 1, copyColorAmount do
+			local tempColor = Color{}
+			tempColor.red = CM.red
+			tempColor.green = CM.green
+			tempColor.blue = CM.blue
+			tempColor.alpha = CM.alpha
+			
+			local colorTableCalculation = (1/copyColorAmount)*(copyColorAmount - i + 1)
+			if interpolateSoftHue == "No" or HI == "Standard" then
+				tempColor.hue = CM.hue - linear(colorTableCalculation, 0, 360/AOH, 1)
+			else
+				tempColor.hue = CM.hue - hueInterpolationCalc(colorTableCalculation, 0, 360/AOH, 1)
+			end
+			while tempColor.hue < 0 do tempColor.hue = tempColor.hue + 360 end
+			while tempColor.hue >= 360 do tempColor.hue = tempColor.hue - 360 end
+			
+			table.insert(paletteSoftHue, tempColor)
+		end
+		
+		if hasCenter == true then
+			table.insert(paletteSoftHue, CM)
+			secondRound = secondRound + 1
+		end
+		
+		for y = 1, copyColorAmount do
+			local tempColor = Color{}
+			tempColor.red = CM.red
+			tempColor.green = CM.green
+			tempColor.blue = CM.blue
+			tempColor.alpha = CM.alpha
+			
+			local colorTableCalculation = (1/copyColorAmount)*y
+			if interpolateSoftHue == "No" or HI == "Standard" then
+				tempColor.hue = CM.hue + linear(colorTableCalculation, 0, 360/AOH, 1)
+			else
+				tempColor.hue = CM.hue + hueInterpolationCalc(colorTableCalculation, 0, 360/AOH, 1)
+			end
+			while tempColor.hue >= 360 do tempColor.hue = tempColor.hue - 360 end
+			
+			table.insert(paletteSoftHue, tempColor)
+		end
+	end
+	
 	return paletteSoftHue
 end
 
