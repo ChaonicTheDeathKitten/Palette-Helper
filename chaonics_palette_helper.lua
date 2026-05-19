@@ -80,8 +80,10 @@ local VI = valInterpolationVar
 local AI = alphaInterpolationVar
 local CT = calcTable
 
+-- Some variables to track windowpenness. I am a true master of words
 local isSettingsWindowOpen = 0
-
+local settingsDlg = nil
+local mainDlg = nil
 
 -- EASING CALCULATIONS
 
@@ -2591,16 +2593,24 @@ local function paletteSoftHueCalc()
 end
 
 
--- RELOAD COLORS
+-- ADVANCED SETTINGS
 
 local function advancedSettings(windowBounds)
 	local dlg
+	if settingsDlg ~= nil then
+		local old = settingsDlg
+		settingsDlg = nil
+		old:close()
+	end
 	dlg = Dialog
 	{ 
 		title = "Chaonic's Advanced Settings",
 		resizeable=false,
 		onclose = function()
-			isSettingsWindowOpen = 0
+			if settingsDlg == dlg then
+				isSettingsWindowOpen = 0
+				settingsDlg = nil
+			end
 		end,
 	}
 	dlg
@@ -3270,24 +3280,40 @@ local function advancedSettings(windowBounds)
 	}
 	
 	function reloadSettingsWindow()
-		if isSettingsWindowOpen == 1 then
-			advancedSettings(dlg.bounds)
-			dlg:close()
-		else
+		if settingsDlg ~= nil then
+			advancedSettings(settingsDlg.bounds)
 		end
 	end
 	
 	function closeSettingsWindow()
 		dlg:close()
 	end
+	
+	-- Variables
+	settingsDlg = dlg
 	isSettingsWindowOpen = 1
 end
 
+-- MAIN TOOL WINDOW
+
 local function reloadColors(windowBounds)
 	local dlg
+	if mainDlg ~= nil then
+		local old = mainDlg
+		mainDlg = nil
+		old:close()
+	end
 	dlg = Dialog
 	{ 
-		title = "Chaonic's Palette Helper"
+		title = "Chaonic's Palette Helper",
+		onclose = function()
+			if mainDlg == dlg then
+				mainDlg = nil
+				if settingsDlg ~= nil then
+					settingsDlg:close()
+				end
+			end
+		end
 	}
 	
 	-- First, let's get the calculation table
@@ -3540,6 +3566,9 @@ local function reloadColors(windowBounds)
 	id = "buttonSettings",
 		text = "Advanced Settings",
 		onclick = function()
+			if isSettingsWindowOpen == 1 then
+				closeSettingsWindow()
+			end
 			advancedSettings()
 		end
 	}
@@ -4107,10 +4136,22 @@ local function reloadColors(windowBounds)
 			SS = satStrength
 			VS = valStrength
 			AS = alphaStrength
+			EnvS = environmentalEnergy
+			SunS = sunEnergy
 			HI = hueInterpolationVar
 			SI = satInterpolationVar
 			VI = valInterpolationVar
 			AI = alphaInterpolationVar
+			includeLeft = "Include Left Extreme"
+			hasLeft = 0
+			includeRight = "Include Right Extreme"
+			hasRight = 0
+			interpolateSoftHue = "No"
+			interpolateHardHue = "No"
+			colorSpaceOklab = "*OKLab*"
+			colorSpaceRGB = "RGB"
+			shadeBaseMainColor = "*Main Color*"
+			shadeBaseStandard = "Standard Interpolation"
 			reloadColors()
 			reloadSettingsWindow()
 			dlg:close()
@@ -4138,6 +4179,7 @@ local function reloadColors(windowBounds)
 	{
 	wait = false, bounds = windowBounds
 	}
+	mainDlg = dlg
 	function reloadColorWindow()
 		reloadColors(dlg.bounds)
 		dlg:close()
