@@ -2277,44 +2277,94 @@ local function paletteSaturationCalc()
 	copyColorAmount = copyColorAmount/2
 	secondRound = copyColorAmount
 	
-	-- Let's get the actual table now
-	-- Starting with desaturated to normal
-	for i = 1, copyColorAmount do
-		local tempColor = Color{}
-		tempColor.red = CM.red
-		tempColor.green = CM.green
-		tempColor.blue = CM.blue
-		tempColor.alpha = CM.alpha
-		-- print (tempColor.saturation)
+	if colorSpaceOklab == "*OKLab*" then
+		local okHue, okSat, okLig = ok_color.srgb_to_okhsl(CM.red/255, CM.green/255, CM.blue/255)
 		
-		-- Let the magic move you!
-		local colorTableCalculation = CT[i]*(SS/100)
-		tempColor.saturation = satInterpolationCalc(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
-		
-		-- print (tempColor.saturation)
-		-- print (CM.saturation)
-		table.insert(paletteSaturation, tempColor)
-	end
-	-- If it has a center, just add the main color in the middle
-	if hasCenter == true then
-		table.insert(paletteSaturation, CM)
-		secondRound = secondRound + 1
-	end
-	-- Lastly, normal to saturated
-	for y = 1, copyColorAmount do
-		local tempColor = Color{}
-		tempColor.red = CM.red
-		tempColor.green = CM.green
-		tempColor.blue = CM.blue
-		tempColor.alpha = CM.alpha
-		-- print (CT[y+secondRound])
+		-- Starting with desaturated to normal
+		for i = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			-- Let the magic move you!
+			local colorTableCalculation = CT[i]*(SS/100)
+			local newSat = satInterpolationCalc(colorTableCalculation, okSat, 1-okSat, 1)
+			
+			local red, green, blue = ok_color.okhsl_to_srgb(okHue, newSat, okLig)
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			tempColor.alpha = CM.alpha
+			
+			table.insert(paletteSaturation, tempColor)
+		end
+		-- If it has a center, just add the main color in the middle
+		if hasCenter == true then
+			table.insert(paletteSaturation, CM)
+			secondRound = secondRound + 1
+		end
+		-- Lastly, normal to saturated
+		for y = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			-- Second round of magic!
+			local colorTableCalculation = CT[y+secondRound]*(SS/100)
+			local newSat = satInterpolationCalc(colorTableCalculation, okSat, 0-okSat, 1)
+			
+			local red, green, blue = ok_color.okhsl_to_srgb(okHue, newSat, okLig)
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			tempColor.alpha = CM.alpha
+			
+			table.insert(paletteSaturation, tempColor)
+		end
+	elseif colorSpaceRGB == "*RGB*" then
+		-- Let's get the actual table now
+		-- Starting with desaturated to normal
+		for i = 1, copyColorAmount do
+			local tempColor = Color{}
+			tempColor.red = CM.red
+			tempColor.green = CM.green
+			tempColor.blue = CM.blue
+			tempColor.alpha = CM.alpha
+			-- print (tempColor.saturation)
+			
+			-- Let the magic move you!
+			local colorTableCalculation = CT[i]*(SS/100)
+			tempColor.saturation = satInterpolationCalc(CT[i]*(SS/100), CM.saturation, 1-CM.saturation, 1)
+			
+			-- print (tempColor.saturation)
+			-- print (CM.saturation)
+			table.insert(paletteSaturation, tempColor)
+		end
+		-- If it has a center, just add the main color in the middle
+		if hasCenter == true then
+			table.insert(paletteSaturation, CM)
+			secondRound = secondRound + 1
+		end
+		-- Lastly, normal to saturated
+		for y = 1, copyColorAmount do
+			local tempColor = Color{}
+			tempColor.red = CM.red
+			tempColor.green = CM.green
+			tempColor.blue = CM.blue
+			tempColor.alpha = CM.alpha
+			-- print (CT[y+secondRound])
 
-		-- Second round of magic!
-		local colorTableCalculation = CT[y+secondRound]*(SS/100)
-		tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, 0-CM.saturation, 1)
-		
-		-- print (tempColor.saturation)
-		table.insert(paletteSaturation, tempColor)
+			-- Second round of magic!
+			local colorTableCalculation = CT[y+secondRound]*(SS/100)
+			tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, 0-CM.saturation, 1)
+			
+			-- print (tempColor.saturation)
+			table.insert(paletteSaturation, tempColor)
+		end
 	end
 	-- -- DEBUG
 	-- for k,v in pairs(paletteSaturation) do
