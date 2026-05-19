@@ -1894,43 +1894,92 @@ local function paletteLightCalc()
 	copyColorAmount = copyColorAmount/2
 	secondRound = copyColorAmount
 	
-	-- Let's get the actual table now
-	-- Starting with black to normal
-	for i = 1, copyColorAmount do
-		local tempColor = Color{}
-		tempColor.red = CM.red
-		tempColor.green = CM.green
-		tempColor.blue = CM.blue
-		tempColor.alpha = CM.alpha
-		-- print (tempColor.lightness)
+	if colorSpaceOklab == "*OKLab*" then
+		local okHue, okSat, okLig = ok_color.srgb_to_okhsl(CM.red/255, CM.green/255, CM.blue/255)
 		
-		-- This is where the magic is happening!
-		local colorTableCalculation = CT[i]*(VS/100)
-		tempColor.lightness = valInterpolationCalc(colorTableCalculation, CM.lightness, 0-CM.lightness, 1)
-		
-		-- print (tempColor.lightness)
-		table.insert(paletteLight, tempColor)
-	end
-	-- If it has a center, just add the main color in the middle
-	if hasCenter == true then
-		table.insert(paletteLight, CM)
-		secondRound = secondRound + 1
-	end
-	-- Lastly, normal to white
-	for y = 1, copyColorAmount do
-		local tempColor = Color{}
-		tempColor.red = CM.red
-		tempColor.green = CM.green
-		tempColor.blue = CM.blue
-		tempColor.alpha = CM.alpha
-		-- print (CT[y+secondRound])
-		
-		-- And the magic continues
-		local colorTableCalculation = CT[y+secondRound]*(VS/100)
-		tempColor.lightness = valInterpolationCalc(colorTableCalculation, CM.lightness, 1-CM.lightness, 1)
-		
-		-- print (tempColor.lightness)
-		table.insert(paletteLight, tempColor)
+		-- Starting with black to normal
+		for i = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			local colorTableCalculation = CT[i]*(VS/100)
+			local newLig = valInterpolationCalc(colorTableCalculation, okLig, 0-okLig, 1)
+			
+			local red, green, blue = ok_color.okhsl_to_srgb(okHue, okSat, newLig)
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			tempColor.alpha = CM.alpha
+			
+			-- print (newLig)
+			table.insert(paletteLight, tempColor)
+		end
+		-- If it has a center, just add the main color in the middle
+		if hasCenter == true then
+			table.insert(paletteLight, CM)
+			secondRound = secondRound + 1
+		end
+		-- Lastly, normal to white
+		for y = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			local colorTableCalculation = CT[y+secondRound]*(VS/100)
+			local newLig = valInterpolationCalc(colorTableCalculation, okLig, 1-okLig, 1)
+			
+			local red, green, blue = ok_color.okhsl_to_srgb(okHue, okSat, newLig)
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			tempColor.alpha = CM.alpha
+			
+			table.insert(paletteLight, tempColor)
+		end
+	elseif colorSpaceRGB == "*RGB*" then
+		-- Let's get the actual table now
+		-- Starting with black to normal
+		for i = 1, copyColorAmount do
+			local tempColor = Color{}
+			tempColor.red = CM.red
+			tempColor.green = CM.green
+			tempColor.blue = CM.blue
+			tempColor.alpha = CM.alpha
+			-- print (tempColor.lightness)
+			
+			-- This is where the magic is happening!
+			local colorTableCalculation = CT[i]*(VS/100)
+			tempColor.lightness = valInterpolationCalc(colorTableCalculation, CM.lightness, 0-CM.lightness, 1)
+			
+			-- print (tempColor.lightness)
+			table.insert(paletteLight, tempColor)
+		end
+		-- If it has a center, just add the main color in the middle
+		if hasCenter == true then
+			table.insert(paletteLight, CM)
+			secondRound = secondRound + 1
+		end
+		-- Lastly, normal to white
+		for y = 1, copyColorAmount do
+			local tempColor = Color{}
+			tempColor.red = CM.red
+			tempColor.green = CM.green
+			tempColor.blue = CM.blue
+			tempColor.alpha = CM.alpha
+			-- print (CT[y+secondRound])
+			
+			-- And the magic continues
+			local colorTableCalculation = CT[y+secondRound]*(VS/100)
+			tempColor.lightness = valInterpolationCalc(colorTableCalculation, CM.lightness, 1-CM.lightness, 1)
+			
+			-- print (tempColor.lightness)
+			table.insert(paletteLight, tempColor)
+		end
 	end
 	-- -- DEBUG
 	-- for k,v in pairs(paletteLight) do
