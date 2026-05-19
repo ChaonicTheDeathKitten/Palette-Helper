@@ -26,7 +26,6 @@ local interpolateHardHue = "No"
 local colorBrush = app.fgColor
 -- Continuing
 
-
 local colorLeft = Color{ r = 15, g = 15, b = 30, a = 255 }
 local colorMain = Color{}
 colorMain.red = colorBrush.red
@@ -80,6 +79,8 @@ local SI = satInterpolationVar
 local VI = valInterpolationVar
 local AI = alphaInterpolationVar
 local CT = calcTable
+
+local isSettingsWindowOpen = 0
 
 
 -- EASING CALCULATIONS
@@ -1468,116 +1469,263 @@ local function paletteShadeCalc()
 	copyColorAmount = copyColorAmount/2
 	secondRound = copyColorAmount
 	
-	-- Let's get the actual table now
-	-- Starting with left color to main color
-	for i = 1, copyColorAmount do
-		local tempColor = Color{}
+	if colorSpaceOklab == "*OKLab*" then
+		-- First.. It makes sense to just convert all of these to OKLab
+		local CMokL, CMoka, CMokb = ok_color.srgb_to_oklab(CM.red/255, CM.green/255, CM.blue/255)
+		local CLokL, CLoka, CLokb = ok_color.srgb_to_oklab(CL.red/255, CL.green/255, CL.blue/255)
+		local CRokL, CRoka, CRokb = ok_color.srgb_to_oklab(CR.red/255, CR.green/255, CR.blue/255)
+		local _, CMokSat, CMokVal = ok_color.srgb_to_okhsv(CM.red/255, CM.green/255, CM.blue/255)
+		local _, CLokSat, CLokVal = ok_color.srgb_to_okhsv(CL.red/255, CL.green/255, CL.blue/255)
+		local _, CRokSat, CRokVal = ok_color.srgb_to_okhsv(CR.red/255, CR.green/255, CR.blue/255)
 		
-		-- First comes the hue interpolation
-		local colorTableCalculation = CT[i]*(HS/100)
-		tempColor.red = hueInterpolationCalc(colorTableCalculation, CM.red, CL.red-CM.red, 1)
-		tempColor.green = hueInterpolationCalc(colorTableCalculation, CM.green, CL.green-CM.green, 1)
-		tempColor.blue = hueInterpolationCalc(colorTableCalculation, CM.blue, CL.blue-CM.blue, 1)
+		-- Let's get the actual table now
+		-- Starting with left color to main color
+		for i = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			-- First comes the hue interpolation (in OKLab L/a/b this time)
+			local colorTableCalculation = CT[i]*(HS/100)
+			local newL = hueInterpolationCalc(colorTableCalculation, CMokL, CLokL-CMokL, 1)
+			local newA = hueInterpolationCalc(colorTableCalculation, CMoka, CLoka-CMoka, 1)
+			local newB = hueInterpolationCalc(colorTableCalculation, CMokb, CLokb-CMokb, 1)
+			local red, green, blue = ok_color.oklab_to_srgb(newL, newA, newB)
+			
+			-- Now comes the actual beast...
+			local colorTableCalculation = CT[i]*(SS/100)
+			if shadeBaseMainColor == "*Main Color*" then
+				if SI == "Standard" then
+				else
+					local h, s, v = ok_color.srgb_to_okhsv(red, green, blue)
+					local newS = satInterpolationCalc(colorTableCalculation, CMokSat, CLokSat-CMokSat, 1)
+					red, green, blue = ok_color.okhsv_to_srgb(h, newS, v)
+				end
+			elseif shadeBaseStandard == "*Standard Interpolation*" then
+				if SI == "Standard" then
+				else
+					local h, s, v = ok_color.srgb_to_okhsv(red, green, blue)
+					local baseSaturation = s
+					local correctedSaturation = satInterpolationCalc(CT[i], CMokSat, CLokSat-CMokSat, 1)
+					local newS = satInterpolationCalc(SS/100, baseSaturation, correctedSaturation-baseSaturation, 1)
+					red, green, blue = ok_color.okhsv_to_srgb(h, newS, v)
+				end
+			end
+			-- Then comes the value interpolation.. I don't think I've ever tweaked this for my own colors, but someone might!
+			local colorTableCalculation = CT[i]*(VS/100)
+			if shadeBaseMainColor == "*Main Color*" then
+				if VI == "Standard" then
+				else
+					local h, s, v = ok_color.srgb_to_okhsv(red, green, blue)
+					local newV = valInterpolationCalc(colorTableCalculation, CMokVal, CLokVal-CMokVal, 1)
+					red, green, blue = ok_color.okhsv_to_srgb(h, s, newV)
+				end
+			elseif shadeBaseStandard == "*Standard Interpolation*" then
+				if VI == "Standard" then
+				else
+					local h, s, v = ok_color.srgb_to_okhsv(red, green, blue)
+					local baseValue = v
+					local correctedValue = valInterpolationCalc(CT[i], CMokVal, CLokVal-CMokVal, 1)
+					local newV = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
+					red, green, blue = ok_color.okhsv_to_srgb(h, s, newV)
+				end
+			end
+			
+			-- Clamp clamp!
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			
+			-- Lastly, the Alpha channel is interpolated!
+			local colorTableCalculation = CT[i]*(AS/100)
+			tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CL.alpha-CM.alpha, 1)
+			
+			-- And print! I mean not actually printing. But now the first half of the table is created!
+			table.insert(paletteShade, tempColor)
+		end
+		-- If it has a center, just add the main color in the middle
+		if hasCenter == true then
+			table.insert(paletteShade, CM)
+			secondRound = secondRound + 1
+		end
+		-- Lastly, main color to right color
+		for y = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			-- Hue interpolation again!
+			local colorTableCalculation = CT[y+secondRound]*(HS/100)
+			local newL = hueInterpolationCalc(colorTableCalculation, CMokL, CRokL-CMokL, 1)
+			local newA = hueInterpolationCalc(colorTableCalculation, CMoka, CRoka-CMoka, 1)
+			local newB = hueInterpolationCalc(colorTableCalculation, CMokb, CRokb-CMokb, 1)
+			local red, green, blue = ok_color.oklab_to_srgb(newL, newA, newB)
+			
+			-- Then the saturation!
+			local colorTableCalculation = CT[y+secondRound]*(SS/100)
+			if shadeBaseMainColor == "*Main Color*" then
+				if SI == "Standard" then
+				else
+					local h, s, v = ok_color.srgb_to_okhsv(red, green, blue)
+					local newS = satInterpolationCalc(colorTableCalculation, CMokSat, CRokSat-CMokSat, 1)
+					red, green, blue = ok_color.okhsv_to_srgb(h, newS, v)
+				end
+			elseif shadeBaseStandard == "*Standard Interpolation*" then
+				if SI == "Standard" then
+				else
+					local h, s, v = ok_color.srgb_to_okhsv(red, green, blue)
+					local baseSaturation = s
+					local correctedSaturation = satInterpolationCalc(CT[y+secondRound], CMokSat, CRokSat-CMokSat, 1)
+					local newS = satInterpolationCalc(SS/100, baseSaturation, correctedSaturation-baseSaturation, 1)
+					red, green, blue = ok_color.okhsv_to_srgb(h, newS, v)
+				end
+			end
+			
+			-- This here, my dear visitor of the code, is the value calculation. Please don't feed it. It has diabetes.. Yeah, that's the punchline.. I'm a genius!
+			local colorTableCalculation = CT[y+secondRound]*(VS/100)
+			if shadeBaseMainColor == "*Main Color*" then
+				if VI == "Standard" then
+				else
+					local h, s, v = ok_color.srgb_to_okhsv(red, green, blue)
+					local newV = valInterpolationCalc(colorTableCalculation, CMokVal, CRokVal-CMokVal, 1)
+					red, green, blue = ok_color.okhsv_to_srgb(h, s, newV)
+				end
+			elseif shadeBaseStandard == "*Standard Interpolation*" then
+				if VI == "Standard" then
+				else
+					local h, s, v = ok_color.srgb_to_okhsv(red, green, blue)
+					local baseValue = v
+					local correctedValue = valInterpolationCalc(CT[y+secondRound], CMokVal, CRokVal-CMokVal, 1)
+					local newV = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
+					red, green, blue = ok_color.okhsv_to_srgb(h, s, newV)
+				end
+			end
+			
+			if red < 0 then red = 0 elseif red > 1 then red = 1 end
+			if green < 0 then green = 0 elseif green > 1 then green = 1 end
+			if blue < 0 then blue = 0 elseif blue > 1 then blue = 1 end
+			tempColor.red = red * 255
+			tempColor.green = green * 255
+			tempColor.blue = blue * 255
+			
+			-- Lastly we interpolate the alpha value!
+			local colorTableCalculation = CT[y+secondRound]*(AS/100)
+			tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CR.alpha-CM.alpha, 1)
+			
+			-- print (tempColor.saturation)
+			table.insert(paletteShade, tempColor)
+		end
+	elseif colorSpaceRGB == "*RGB*" then
+		-- Let's get the actual table now
+		-- Starting with left color to main color
+		for i = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			-- First comes the hue interpolation
+			local colorTableCalculation = CT[i]*(HS/100)
+			tempColor.red = hueInterpolationCalc(colorTableCalculation, CM.red, CL.red-CM.red, 1)
+			tempColor.green = hueInterpolationCalc(colorTableCalculation, CM.green, CL.green-CM.green, 1)
+			tempColor.blue = hueInterpolationCalc(colorTableCalculation, CM.blue, CL.blue-CM.blue, 1)
 
-		-- Then comes the saturation interpolation. Standard here preserves the loss in saturation in linear RGB interpolation. Meanwhile linear interpolates the saturation of each endpoint.
-		local colorTableCalculation = CT[i]*(SS/100)
-		if shadeBaseMainColor == "*Main Color*" then
-			if SI == "Standard" then
-				tempColor.saturation = tempColor.saturation
-			else
-				tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, CL.saturation-CM.saturation, 1)
+			-- Then comes the saturation interpolation. Standard here preserves the loss in saturation in linear RGB interpolation. Meanwhile linear interpolates the saturation of each endpoint.
+			local colorTableCalculation = CT[i]*(SS/100)
+			if shadeBaseMainColor == "*Main Color*" then
+				if SI == "Standard" then
+					tempColor.saturation = tempColor.saturation
+				else
+					tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, CL.saturation-CM.saturation, 1)
+				end
+			elseif shadeBaseStandard == "*Standard Interpolation*" then
+				if SI == "Standard" then
+					tempColor.saturation = tempColor.saturation
+				else
+					local baseSaturation = tempColor.saturation
+					local correctedSaturation = satInterpolationCalc(CT[i], CM.saturation, CL.saturation-CM.saturation, 1)
+					tempColor.saturation = satInterpolationCalc(SS/100, baseSaturation, correctedSaturation-baseSaturation, 1)
+				end
 			end
-		elseif shadeBaseStandard == "*Standard Interpolation*" then
-			if SI == "Standard" then
-				tempColor.saturation = tempColor.saturation
-			else
-				local baseSaturation = tempColor.saturation
-				local correctedSaturation = satInterpolationCalc(CT[i], CM.saturation, CL.saturation-CM.saturation, 1)
-				tempColor.saturation = satInterpolationCalc(SS/100, baseSaturation, correctedSaturation-baseSaturation, 1)
+			-- Then comes the value! I think that in this new version, tweaking the interpolation may make it actually look good!
+			local colorTableCalculation = CT[i]*(VS/100)
+			if shadeBaseMainColor == "*Main Color*" then
+				if VI == "Standard" then
+					tempColor.value = tempColor.value
+				else
+					tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CL.value-CM.value, 1)
+				end
+			elseif shadeBaseStandard == "*Standard Interpolation*" then
+				if VI == "Standard" then
+					tempColor.value = tempColor.value
+				else
+					local baseValue = tempColor.value
+					local correctedValue = valInterpolationCalc(CT[i], CM.value, CL.value-CM.value, 1)
+					tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
+				end
 			end
+			
+			-- Lastly, the Alpha channel is interpolated!
+			local colorTableCalculation = CT[i]*(AS/100)
+			tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CL.alpha-CM.alpha, 1)
+			
+			-- And print! I mean not actually printing. But now the first half of the table is created!
+			table.insert(paletteShade, tempColor)
 		end
-		-- Then comes the value interpolation.. I don't think I've ever tweaked this for my own colors, but someone might!
-		local colorTableCalculation = CT[i]*(VS/100)
-		if shadeBaseMainColor == "*Main Color*" then
-			if VI == "Standard" then
-				tempColor.value = tempColor.value
-			else
-				tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CL.value-CM.value, 1)
-			end
-		elseif shadeBaseStandard == "*Standard Interpolation*" then
-			if VI == "Standard" then
-				tempColor.value = tempColor.value
-			else
-				local baseValue = tempColor.value
-				local correctedValue = valInterpolationCalc(CT[i], CM.value, CL.value-CM.value, 1)
-				tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
-			end
+		-- If it has a center, just add the main color in the middle
+		if hasCenter == true then
+			table.insert(paletteShade, CM)
+			secondRound = secondRound + 1
 		end
-		
-		-- Lastly, the Alpha channel is interpolated!
-		local colorTableCalculation = CT[i]*(AS/100)
-		tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CL.alpha-CM.alpha, 1)
-		
-		-- And print! I mean not actually printing. But now the first half of the table is created!
-		table.insert(paletteShade, tempColor)
-	end
-	-- If it has a center, just add the main color in the middle
-	if hasCenter == true then
-		table.insert(paletteShade, CM)
-		secondRound = secondRound + 1
-	end
-	-- Lastly, main color to right color
-	for y = 1, copyColorAmount do
-		local tempColor = Color{}
-		
-		-- Hue interpolation again!
-		local colorTableCalculation = CT[y+secondRound]*(HS/100)
-		tempColor.red = hueInterpolationCalc(colorTableCalculation, CM.red, CR.red-CM.red, 1)
-		tempColor.green = hueInterpolationCalc(colorTableCalculation, CM.green, CR.green-CM.green, 1)
-		tempColor.blue = hueInterpolationCalc(colorTableCalculation, CM.blue, CR.blue-CM.blue, 1)
+		-- Lastly, main color to right color
+		for y = 1, copyColorAmount do
+			local tempColor = Color{}
+			
+			-- Hue interpolation again!
+			local colorTableCalculation = CT[y+secondRound]*(HS/100)
+			tempColor.red = hueInterpolationCalc(colorTableCalculation, CM.red, CR.red-CM.red, 1)
+			tempColor.green = hueInterpolationCalc(colorTableCalculation, CM.green, CR.green-CM.green, 1)
+			tempColor.blue = hueInterpolationCalc(colorTableCalculation, CM.blue, CR.blue-CM.blue, 1)
 
-		-- Then the saturation!
-		local colorTableCalculation = CT[y+secondRound]*(SS/100)
-		if shadeBaseMainColor == "*Main Color*" then
-			if SI == "Standard" then
-				tempColor.saturation = tempColor.saturation
-			else
-				tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, CR.saturation-CM.saturation, 1)
+			-- Then the saturation!
+			local colorTableCalculation = CT[y+secondRound]*(SS/100)
+			if shadeBaseMainColor == "*Main Color*" then
+				if SI == "Standard" then
+					tempColor.saturation = tempColor.saturation
+				else
+					tempColor.saturation = satInterpolationCalc(colorTableCalculation, CM.saturation, CR.saturation-CM.saturation, 1)
+				end
+			elseif shadeBaseStandard == "*Standard Interpolation*" then
+				if SI == "Standard" then
+					tempColor.saturation = tempColor.saturation
+				else
+					local baseSaturation = tempColor.saturation
+					local correctedSaturation = satInterpolationCalc(CT[y+secondRound], CM.saturation, CR.saturation-CM.saturation, 1)
+					tempColor.saturation = satInterpolationCalc(SS/100, baseSaturation, correctedSaturation-baseSaturation, 1)
+				end
 			end
-		elseif shadeBaseStandard == "*Standard Interpolation*" then
-			if SI == "Standard" then
-				tempColor.saturation = tempColor.saturation
-			else
-				local baseSaturation = tempColor.saturation
-				local correctedSaturation = satInterpolationCalc(CT[y+secondRound], CM.saturation, CR.saturation-CM.saturation, 1)
-				tempColor.saturation = satInterpolationCalc(SS/100, baseSaturation, correctedSaturation-baseSaturation, 1)
+			
+			-- Now comes the (useless) value calculation. Luckily, standard skips it. I really wonder if I should keep this... Or change the order of operation to before saturation??.. Who cares?!
+			local colorTableCalculation = CT[y+secondRound]*(VS/100)
+			if shadeBaseMainColor == "*Main Color*" then
+				if VI == "Standard" then
+					tempColor.value = tempColor.value
+				else
+					tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CR.value-CM.value, 1)
+				end
+			elseif shadeBaseStandard == "*Standard Interpolation*" then
+				if VI == "Standard" then
+					tempColor.value = tempColor.value
+				else
+					local baseValue = tempColor.value
+					local correctedValue = valInterpolationCalc(CT[y+secondRound], CM.value, CR.value-CM.value, 1)
+					tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
+				end
 			end
+			
+			-- Lastly we interpolate the alpha value!
+			local colorTableCalculation = CT[y+secondRound]*(AS/100)
+			tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CR.alpha-CM.alpha, 1)
+			
+			-- print (tempColor.saturation)
+			table.insert(paletteShade, tempColor)
 		end
-		
-		-- Now comes the (useless) value calculation. Luckily, standard skips it. I really wonder if I should keep this... Or change the order of operation to before saturation??.. Who cares?!
-		local colorTableCalculation = CT[y+secondRound]*(VS/100)
-		if shadeBaseMainColor == "*Main Color*" then
-			if VI == "Standard" then
-				tempColor.value = tempColor.value
-			else
-				tempColor.value = valInterpolationCalc(colorTableCalculation, CM.value, CR.value-CM.value, 1)
-			end
-		elseif shadeBaseStandard == "*Standard Interpolation*" then
-			if VI == "Standard" then
-				tempColor.value = tempColor.value
-			else
-				local baseValue = tempColor.value
-				local correctedValue = valInterpolationCalc(CT[y+secondRound], CM.value, CR.value-CM.value, 1)
-				tempColor.value = valInterpolationCalc(VS/100, baseValue, correctedValue-baseValue, 1)
-			end
-		end
-		
-		-- Lastly we interpolate the alpha value!
-		local colorTableCalculation = CT[y+secondRound]*(AS/100)
-		tempColor.alpha = alphaInterpolationCalc(colorTableCalculation, CM.alpha, CR.alpha-CM.alpha, 1)
-		
-		-- print (tempColor.saturation)
-		table.insert(paletteShade, tempColor)
 	end
 	-- Oh hi debug code from ages ago! I have no idea what you're doing anymore, but I don't wanna delete you! Ultimate proof I've only learned enough lua to write this plugin..
 	-- -- DEBUG
@@ -2399,7 +2547,11 @@ local function advancedSettings(windowBounds)
 	local dlg
 	dlg = Dialog
 	{ 
-		title = "Chaonic's Advanced Settings"
+		title = "Chaonic's Advanced Settings",
+		resizeable=false,
+		onclose = function()
+			isSettingsWindowOpen = 0
+		end,
 	}
 	dlg
 	:separator
@@ -2866,13 +3018,13 @@ local function advancedSettings(windowBounds)
 			CR = 	Color{ r = 230, g = 230, b = 195, a = 255 }
 			AOC = 	9
 			AOH = 	9
-			AOSH = 	6
+			AOSH = 	9
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
 			HI = 	"Standard"
-			SI = 	"Sine"
+			SI = 	"Standard"
 			VI = 	"Standard"
 			AI =	"Linear"
 			advancedSettings(dlg.bounds)
@@ -2889,13 +3041,13 @@ local function advancedSettings(windowBounds)
 			CR = 	Color{ r = 242, g = 218, b = 170, a = 255 }
 			AOC = 	9
 			AOH = 	9
-			AOSH = 	6
+			AOSH = 	9
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
 			HI = 	"Standard"
-			SI = 	"Sine"
+			SI = 	"Standard"
 			VI = 	"Standard"
 			AI =	"Linear"
 			advancedSettings(dlg.bounds)
@@ -2912,13 +3064,13 @@ local function advancedSettings(windowBounds)
 			CR = 	Color{ r = 228, g = 242, b = 157, a = 255 }
 			AOC = 	9
 			AOH = 	9
-			AOSH = 	6
+			AOSH = 	9
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
 			HI = 	"Standard"
-			SI = 	"Sine"
+			SI = 	"Standard"
 			VI = 	"Standard"
 			AI =	"Linear"
 			advancedSettings(dlg.bounds)
@@ -2936,13 +3088,13 @@ local function advancedSettings(windowBounds)
 			CR = 	Color{ r = 235, g = 235, b = 164, a = 255 }
 			AOC = 	9
 			AOH = 	9
-			AOSH = 	6
+			AOSH = 	9
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
 			HI = 	"Standard"
-			SI = 	"Sine"
+			SI = 	"Standard"
 			VI = 	"Standard"
 			AI =	"Linear"
 			advancedSettings(dlg.bounds)
@@ -2959,13 +3111,13 @@ local function advancedSettings(windowBounds)
 			CR = 	Color{ r = 255, g = 255, b = 191, a = 255 }
 			AOC = 	9
 			AOH = 	9
-			AOSH = 	6
+			AOSH = 	9
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
 			HI = 	"Standard"
-			SI = 	"Sine"
+			SI = 	"Standard"
 			VI = 	"Standard"
 			AI =	"Linear"
 			advancedSettings(dlg.bounds)
@@ -2982,13 +3134,13 @@ local function advancedSettings(windowBounds)
 			CR = 	Color{ r = 255, g = 247, b = 204, a = 255 }
 			AOC = 	9
 			AOH = 	9
-			AOSH = 	6
+			AOSH = 	9
 			HS = 	100
 			SS = 	100
 			VS = 	100
 			AS = 	100
 			HI = 	"Standard"
-			SI = 	"Sine"
+			SI = 	"Standard"
 			VI = 	"Standard"
 			AI =	"Linear"
 			advancedSettings(dlg.bounds)
@@ -3005,13 +3157,13 @@ local function advancedSettings(windowBounds)
 			CR = 	Color{ r = 247, g = 255, b = 204, a = 255 }
 			AOC = 	9
 			AOH = 	9
-			AOSH = 	6
+			AOSH = 	9
 			HS = 	80
 			SS = 	100
 			VS = 	100
 			AS = 	100
 			HI = 	"Standard"
-			SI = 	"Sine"
+			SI = 	"Standard"
 			VI = 	"Standard"
 			AI =	"Linear"
 			advancedSettings(dlg.bounds)
@@ -3019,99 +3171,31 @@ local function advancedSettings(windowBounds)
 			dlg:close()
 		end
 	}
-	:button
-	{
-		id = "buttonPresetCustom1",
-		label = "",
-		text = presetcustom1name,
-		onclick = function()
-			CL = 	presetcustom1colorLeft
-			CR = 	presetcustom1colorRight
-			AOC = 	presetcustom1amountOfColorsVar
-			AOH = 	presetcustom1amountOfHuesVar
-			AOSH = 	presetcustom1amountOfSoftHuesVar
-			HS = 	presetcustom1hueStrength
-			SS = 	presetcustom1satStrength
-			VS = 	presetcustom1valStrength
-			AS = 	presetcustom1alphaStrength
-			HI = 	presetcustom1hueInterpolationVar
-			SI = 	presetcustom1satInterpolationVar
-			VI = 	presetcustom1valInterpolationVar
-			AI =	presetcustom1alphaInterpolationVar
-			advancedSettings(dlg.bounds)
-			reloadColorWindow()
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPresetCustom2",
-		text = presetcustom2name,
-		onclick = function()
-			CL = 	presetcustom2colorLeft
-			CR = 	presetcustom2colorRight
-			AOC = 	presetcustom2amountOfColorsVar
-			AOH = 	presetcustom2amountOfHuesVar
-			AOSH = 	presetcustom2amountOfSoftHuesVar
-			HS = 	presetcustom2hueStrength
-			SS = 	presetcustom2satStrength
-			VS = 	presetcustom2valStrength
-			AS = 	presetcustom2alphaStrength
-			HI = 	presetcustom2hueInterpolationVar
-			SI = 	presetcustom2satInterpolationVar
-			VI = 	presetcustom2valInterpolationVar
-			AI =	presetcustom2alphaInterpolationVar
-			advancedSettings(dlg.bounds)
-			reloadColorWindow()
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPresetCustom3",
-		text = presetcustom3name,
-		onclick = function()
-			CL = 	presetcustom3colorLeft
-			CR = 	presetcustom3colorRight
-			AOC = 	presetcustom3amountOfColorsVar
-			AOH = 	presetcustom3amountOfHuesVar
-			AOSH = 	presetcustom3amountOfSoftHuesVar
-			HS = 	presetcustom3hueStrength
-			SS = 	presetcustom3satStrength
-			VS = 	presetcustom3valStrength
-			AS = 	presetcustom3alphaStrength
-			HI = 	presetcustom3hueInterpolationVar
-			SI = 	presetcustom3satInterpolationVar
-			VI = 	presetcustom3valInterpolationVar
-			AI =	presetcustom3alphaInterpolationVar
-			advancedSettings(dlg.bounds)
-			reloadColorWindow()
-			dlg:close()
-		end
-	}
-	:button
-	{
-		id = "buttonPresetCustom4",
-		text = presetcustom4name,
-		onclick = function()
-			CL = 	presetcustom4colorLeft
-			CR = 	presetcustom4colorRight
-			AOC = 	presetcustom4amountOfColorsVar
-			AOH = 	presetcustom4amountOfHuesVar
-			AOSH = 	presetcustom4amountOfSoftHuesVar
-			HS = 	presetcustom4hueStrength
-			SS = 	presetcustom4satStrength
-			VS = 	presetcustom4valStrength
-			AS = 	presetcustom4alphaStrength
-			HI = 	presetcustom4hueInterpolationVar
-			SI = 	presetcustom4satInterpolationVar
-			VI = 	presetcustom4valInterpolationVar
-			AI =	presetcustom4alphaInterpolationVar
-			advancedSettings(dlg.bounds)
-			reloadColorWindow()
-			dlg:close()
-		end
-	}
+	-- This is an artifact of times past. This is how I used to call custom settings.
+	--:button
+	--{
+	--	id = "buttonPresetCustom1",
+	--	label = "",
+	--	text = presetcustom1name,
+	--	onclick = function()
+	--		CL = 	presetcustom1colorLeft
+	--		CR = 	presetcustom1colorRight
+	--		AOC = 	presetcustom1amountOfColorsVar
+	--		AOH = 	presetcustom1amountOfHuesVar
+	--		AOSH = 	presetcustom1amountOfSoftHuesVar
+	--		HS = 	presetcustom1hueStrength
+	--		SS = 	presetcustom1satStrength
+	--		VS = 	presetcustom1valStrength
+	--		AS = 	presetcustom1alphaStrength
+	--		HI = 	presetcustom1hueInterpolationVar
+	--		SI = 	presetcustom1satInterpolationVar
+	--		VI = 	presetcustom1valInterpolationVar
+	--		AI =	presetcustom1alphaInterpolationVar
+	--		advancedSettings(dlg.bounds)
+	--		reloadColorWindow()
+	--		dlg:close()
+	--	end
+	--}
 :separator
 	{
 		id = "separator",
@@ -3125,6 +3209,7 @@ local function advancedSettings(windowBounds)
 		text = "Reload",
 		onclick = function()
 			advancedSettings(dlg.bounds)
+			reloadSettingsWindow()
 			reloadColorWindow()
 			dlg:close()
 		end
@@ -3133,6 +3218,19 @@ local function advancedSettings(windowBounds)
 	{
 	wait = false, bounds = windowBounds
 	}
+	
+	function reloadSettingsWindow()
+		if isSettingsWindowOpen == 1 then
+			advancedSettings(dlg.bounds)
+			dlg:close()
+		else
+		end
+	end
+	
+	function closeSettingsWindow()
+		dlg:close()
+	end
+	isSettingsWindowOpen = 1
 end
 
 local function reloadColors(windowBounds)
@@ -3964,6 +4062,7 @@ local function reloadColors(windowBounds)
 			VI = valInterpolationVar
 			AI = alphaInterpolationVar
 			reloadColors()
+			reloadSettingsWindow()
 			dlg:close()
 		end
 	}
@@ -3973,6 +4072,7 @@ local function reloadColors(windowBounds)
 		text = "Reload",
 		onclick = function()
 			reloadColors(dlg.bounds)
+			reloadSettingsWindow()
 			dlg:close()
 		end
 	}
