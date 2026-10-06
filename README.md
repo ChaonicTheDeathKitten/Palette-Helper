@@ -1,6 +1,9 @@
 > [!WARNING]
 > This is not a standalone tool. This is a script for Aseprite and is useless without it.
 # Palette Helper for Aseprite
+![Palette Helper Example](example.png)
+
+
 A tool to quickly and easily generate gradients.
 
 **More information and downloads at itch.io: [Palette Helper for Aseprite](https://chaonic.itch.io/aseprite-palette-helper)**
